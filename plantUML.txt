@@ -1,0 +1,114 @@
+@startuml FitApp_Class_Diagram
+
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' --- DOMAIN LAYER ---
+package "FitApp.Domain" {
+    class User <<Entity>> {
+        + Guid Id
+        + String Email
+        + String Name
+        + UserRole Role
+        + CalculateBMR()
+    }
+
+    class MealLog <<Entity>> {
+        + Guid Id
+        + DateTime LogDate
+        + MealType Type
+        + List<MealLogItem> Items
+        + GetTotalCalories()
+    }
+
+    class MealLogItem <<ValueObject>> {
+        + String FoodName
+        + int QuantityG
+        + int Kcal
+        + MacroNutrients Macros
+    }
+
+    class WorkoutLog <<Entity>> {
+        + Guid Id
+        + DateTime LogDate
+        + List<WorkoutSet> Sets
+    }
+
+    class WorkoutSet <<Entity>> {
+        + String ExerciseName
+        + int Reps
+        + decimal Weight
+    }
+
+    class GymMembership <<Entity>> {
+        + Guid Id
+        + DateTime EndDate
+        + MembershipStatus Status
+        + IsActive() : bool
+    }
+
+    enum UserRole {
+        User
+        Trainer
+        GymAdmin
+    }
+}
+
+' --- APPLICATION LAYER ---
+package "FitApp.Application" {
+    interface IUserRepository {
+        + GetById(id)
+        + Save(user)
+    }
+
+    interface IMealRepository {
+        + GetByDate(userId, date)
+    }
+
+    class AddMealCommand {
+        + Guid UserId
+        + String Barcode
+        + int Weight
+    }
+
+    class DailySummaryQuery {
+        + DateTime Date
+    }
+}
+
+' --- INFRASTRUCTURE LAYER ---
+package "FitApp.Infrastructure" {
+    class AppDbContext {
+        + DbSet<User> Users
+        + DbSet<MealLog> MealLogs
+        + OnModelCreating()
+    }
+
+    class StripeService {
+        + CreateCheckoutSession()
+        + HandleWebhook()
+    }
+
+    class ClaudeAIService {
+        + AnalyzePlateImage()
+        + GetCoachingResponse()
+    }
+}
+
+' --- RELATIONSHIPS ---
+
+' Domain relations
+User "1" *-- "1" GymMembership : owns
+User "1" o-- "0..*" MealLog : tracks
+User "1" o-- "0..*" WorkoutLog : performs
+MealLog "1" *-- "0..*" MealLogItem : contains
+WorkoutLog "1" *-- "0..*" WorkoutSet : consists of
+
+' Layer dependencies
+AppDbContext ..|> IUserRepository : implements
+AppDbContext --> User : persists
+AddMealCommand ..> IMealRepository : uses
+ClaudeAIService ..> User : analyzes data for
+
+@enduml
