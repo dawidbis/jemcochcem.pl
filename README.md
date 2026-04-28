@@ -1,85 +1,148 @@
-🍎 FitApp — Personalny Dziennik Diety i KaloriiLekka aplikacja fitness skoncentrowana na precyzyjnym liczeniu kalorii, zarządzaniu celami żywieniowymi oraz analizie składu ciała — zbudowana w React 18 + C# ASP.NET Core 8.📋 Spis treściOpis projektuAktorzy systemuStack technologicznyArchitekturaSchemat bazy danychModuły funkcjonalneREST APIStruktura projektuPlan iteracji
+# 🍎 FitApp — Personalny Dziennik Diety i Kalorii
 
-🎯 Opis projektuFitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do monitorowania odżywiania. Skupia się na prostocie i dostarczaniu wartościowych danych o spożyciu bez zbędnych rozpraszaczy.ObszarOpisDziennik DietyLogowanie posiłków, kalkulator TDEE/BMR, skanowanie kodów kreskowych (Open Food Facts).Pomiary CiałaŚledzenie wagi, obwodów i poziomu tkanki tłuszczowej na osi czasu.AI SupportSzybka analiza kalorii ze zdjęcia talerza i konsultacja z AI Coachem (Claude API).
+> Lekka aplikacja fitness skoncentrowana na precyzyjnym liczeniu kalorii, zarządzaniu celami żywieniowymi oraz analizie składu ciała — zbudowana w **React 18** + **C# ASP.NET Core 8**.
 
-👥 Aktorzy systemu[User] — UżytkownikOblicza zapotrzebowanie kaloryczne (TDEE).Prowadzi codzienny dziennik posiłków (ręcznie lub skanerem).Analizuje postępy sylwetkowe na wykresach.Korzysta z analizy zdjęć posiłków przez AI.[System] — Zewnętrzne APIOpen Food Facts API — baza produktów spożywczych (barcode lookup).Claude API (Anthropic) — silnik AI do analizy zdjęć i porad dietetycznych.🛠 Stack technologicznyFrontendReact 18 (Vite) z TypeScript.TanStack Query do zarządzania stanem serwerowym.Tailwind CSS + shadcn/ui dla interfejsu.Recharts do wizualizacji wagi i makroskładników.BackendASP.NET Core 8.0 (C# 12).EF Core 8 + SQL Server (Baza danych).Redis jako cache dla wyszukiwań produktów (OFF API).MediatR (CQRS) dla czystej logiki biznesowej.JWT dla bezpiecznej autoryzacji (Access + Refresh Tokens).🗄 Schemat bazy danych (Uproszczony)Users: Profil, dane logowania.UserGoals: Aktualne cele (kcal, białko, węgle, tłuszcze).FoodProducts: Baza produktów (lokalna + zbuforowane dane z zewnątrz).MealLogs / MealLogItems: Rejestr spożycia z podziałem na posiłki i gramatury.BodyMeasurements: Historia wagi i wymiarów ciała.
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat&logo=typescript&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat&logo=dotnet&logoColor=white)
+![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=flat&logo=microsoftsqlserver&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?style=flat&logo=redis&logoColor=white)
 
-📦 Moduły funkcjonalneKontrola DietyKalkulator Mifflin-St Jeor: Automatyczne wyznaczanie celu na start.Skaner kodów: Integracja z aparatem (React-barcode-qrcode-scanner).Baza produktów: Fallback z lokalnej bazy do Open Food Facts.Dzienny dashboard: Procentowa realizacja celów B/W/T.Moduł AIWizualna ocena posiłku: Zdjęcie → AI → Estymacja gramatury i kalorii.Chatbot: Możliwość zadawania pytań o zamienniki produktów lub porady dietetyczne.
+---
 
-🌐 REST APIMetodaEndpointOpisGET/api/v1/diary/{date}Kompletny dziennik dniaPOST/api/v1/diary/itemsDodaj produkt (gramatura, ID produktu)GET/api/v1/foods/barcode/{code}Pobierz dane po kodzie (z cache Redis)POST/api/v1/profile/measurementsZapisz nową wagę/obwodyPOST/api/v1/ai/chatPytanie do AI Coacha
+## 📋 Spis treści
 
-📁 Struktura projektu FitApp
+- [Opis projektu](#-opis-projektu)
+- [Aktorzy systemu](#-aktorzy-systemu)
+- [Stack technologiczny](#-stack-technologiczny)
+- [Schemat bazy danych](#-schemat-bazy-danych)
+- [Moduły funkcjonalne](#-moduły-funkcjonalne)
+- [REST API](#-rest-api)
+- [Struktura projektu](#-struktura-projektu)
+- [Plan iteracji](#-plan-iteracji)
+
+---
+
+## 🎯 Opis projektu
+
+FitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do kompleksowego monitorowania odżywiania. Skupia się na prostocie i dostarczaniu wartościowych danych o spożyciu bez zbędnych rozpraszaczy.
+
+| Obszar | Opis |
+| :--- | :--- |
+| **Dziennik Diety** | Logowanie posiłków, kalkulator TDEE/BMR, skanowanie kodów kreskowych (Open Food Facts). |
+| **Pomiary Ciała** | Śledzenie wagi, obwodów i poziomu tkanki tłuszczowej na osi czasu. |
+| **AI Support** | Szybka analiza kalorii ze zdjęcia talerza i konsultacja z AI Coachem (Claude API). |
+
+---
+
+## 👥 Aktorzy systemu
+
+### `[User]` — Użytkownik
+* Oblicza zapotrzebowanie kaloryczne (TDEE).
+* Prowadzi codzienny dziennik posiłków (ręcznie lub skanerem).
+* Analizuje postępy sylwetkowe na interaktywnych wykresach.
+* Korzysta z analizy zdjęć posiłków przez AI.
+
+### `[System]` — Zewnętrzne API
+* **Open Food Facts API** — globalna baza produktów spożywczych (barcode lookup).
+* **Claude API (Anthropic)** — zaawansowany silnik AI do analizy zdjęć i porad dietetycznych.
+
+---
+
+## 🛠 Stack technologiczny
+
+### Frontend
+| Technologia | Zastosowanie |
+| :--- | :--- |
+| **React 18 (Vite)** | Framework UI i środowisko uruchomieniowe. |
+| **TypeScript** | Silne typowanie i bezpieczeństwo kodu. |
+| **TanStack Query** | Zarządzanie stanem serwerowym i synchronizacja danych. |
+| **Tailwind CSS** | System stylizacji utility-first. |
+| **shadcn/ui** | Biblioteka dostępnych komponentów UI. |
+| **Recharts** | Wizualizacja trendów wagi i makroskładników. |
+
+### Backend
+| Technologia | Zastosowanie |
+| :--- | :--- |
+| **ASP.NET Core 8.0** | Silnik REST API (C# 12). |
+| **EF Core 8** | ORM do komunikacji z bazą danych SQL Server. |
+| **Redis** | Szybki cache dla wyszukiwań produktów (OFF API). |
+| **MediatR** | Implementacja wzorca CQRS dla czystej logiki biznesowej. |
+| **JWT** | Bezpieczna autoryzacja (Access + Refresh Tokens). |
+
+---
+
+## 🗄 Schemat bazy danych (Uproszczony)
+
+* **Users**: Profile użytkowników, dane logowania i preferencje.
+* **UserGoals**: Aktualne cele (kcal, białko, węglowodany, tłuszcze).
+* **FoodProducts**: Lokalna baza produktów + zbuforowane dane z OFF API.
+* **MealLogs / MealLogItems**: Rejestr dziennego spożycia z podziałem na posiłki.
+* **BodyMeasurements**: Historia wagi oraz precyzyjnych wymiarów ciała.
+
+---
+
+## 📦 Moduły funkcjonalne
+
+### Kontrola Diety
+* **Kalkulator Mifflin-St Jeor**: Automatyczne wyznaczanie celu kalorycznego na start.
+* **Skaner kodów**: Integracja z aparatem telefonu (`React-barcode-qrcode-scanner`).
+* **Baza produktów**: Mechanizm fallback (szukaj lokalnie -> szukaj w OFF API).
+* **Dzienny dashboard**: Procentowa i wizualna realizacja celów B/W/T.
+
+### Moduł AI
+* **Wizualna ocena posiłku**: Przetworzenie zdjęcia przez AI w celu estymacji kalorii.
+* **Chatbot**: Interaktywne pytania o zamienniki produktów lub porady dietetyczne.
+
+---
+
+## 🌐 REST API
+
+| Metoda | Endpoint | Opis |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/diary/{date}` | Pobranie kompletnego dziennika z danego dnia. |
+| `POST` | `/api/v1/diary/items` | Dodanie produktu do posiłku (ID, gramatura). |
+| `GET` | `/api/v1/foods/barcode/{code}` | Pobranie danych produktu (z cache Redis). |
+| `POST` | `/api/v1/profile/measurements` | Zapisanie nowej wagi lub obwodów ciała. |
+| `POST` | `/api/v1/ai/chat` | Przesłanie zapytania do AI Coacha. |
+
+---
+
+## 📁 Struktura projektu
+
+```text
 FitApp/
 ├── FitApp.sln
 ├── docker-compose.yml
 ├── .gitignore
 │
 ├── src/
-│   ├── FitApp.Domain/                  # Warstwa serca (Reguły biznesowe)
-│   │   ├── Entities/                   # User, MealLog, MealLogItem, FoodProduct, BodyMeasurement
-│   │   ├── ValueObjects/               # MacroNutrients (B/W/T), CalorieGoal
-│   │   ├── Interfaces/                 # IUserRepository, IFoodRepository (abstrakcje)
-│   │   └── Exceptions/                 # DomainException (np. przekroczenie zakresu kcal)
+│   ├── FitApp.Domain/              # Encje i reguły biznesowe
+│   │   ├── Entities/               # User, MealLog, FoodProduct, BodyMeasurement
+│   │   ├── ValueObjects/           # MacroNutrients, CalorieGoal
+│   │   └── Interfaces/             # Abstrakcje repozytoriów
 │   │
-│   ├── FitApp.Application/             # Warstwa Logiki (CQRS + MediatR)
-│   │   ├── Features/
-│   │   │   ├── Diet/
-│   │   │   │   ├── Commands/           # AddMealItem, UpdatePortion, DeleteMealItem
-│   │   │   │   └── Queries/            # GetDailyDiary, GetFoodSearch, GetMacrosStats
-│   │   │   ├── Profile/
-│   │   │   │   ├── Commands/           # UpdateBodyMeasurements, CalculateTdee
-│   │   │   │   └── Queries/            # GetWeightHistory
-│   │   │   ├── AI/
-│   │   │   │   └── Commands/           # AnalyzeMealPhoto, AskAiCoach
-│   │   │   └── Auth/                   # Login, Register
-│   │   ├── DTOs/                       # Obiekty transferu danych (UserDto, DiaryDto)
-│   │   ├── Validators/                 # FluentValidation (np. gramatura musi być > 0)
-│   │   └── Interfaces/                 # IClaudeAiService, IOffApiClient, IRedisCache
+│   ├── FitApp.Application/         # Logika (CQRS + MediatR)
+│   │   ├── Features/               # Diet, Profile, AI, Auth (Vertical Slices)
+│   │   ├── DTOs/                   # Obiekty transferu danych
+│   │   └── Validators/             # FluentValidation
 │   │
-│   ├── FitApp.Infrastructure/          # Warstwa Techniczna (Implementacje)
-│   │   ├── Data/
-│   │   │   ├── AppDbContext.cs         # Konfiguracja EF Core
-│   │   │   ├── Migrations/             # Migracje bazy SQL
-│   │   │   └── Repositories/           # Konkretne implementacje dostępu do danych
-│   │   ├── ExternalServices/
-│   │   │   ├── OpenFoodFactsClient.cs  # Klient HTTP do bazy produktów
-│   │   │   └── ClaudeAiService.cs      # Integracja z API Anthropic
-│   │   └── Cache/
-│   │       └── RedisCacheService.cs    # Przechowywanie wyników z OFF API (TTL 24h)
+│   ├── FitApp.Infrastructure/      # Implementacje techniczne
+│   │   ├── Data/                   # AppDbContext, Migracje, Repositories
+│   │   ├── ExternalServices/       # OpenFoodFactsClient, ClaudeAiService
+│   │   └── Cache/                  # RedisCacheService (TTL 24h)
 │   │
-│   └── FitApp.API/                     # Warstwa Prezentacji (Endpointy)
-│       ├── Controllers/
-│       │   ├── AuthController.cs
-│       │   ├── DiaryController.cs
-│       │   ├── ProfileController.cs
-│       │   └── AIController.cs
-│       ├── Middleware/
-│       │   ├── ExceptionHandler.cs     # Globalne wyłapywanie błędów
-│       │   └── JwtMiddleware.cs        # Weryfikacja tokenów
-│       └── Program.cs                  # Rejestracja DI i start aplikacji
+│   └── FitApp.API/                 # Prezentacja (Endpointy)
+│       ├── Controllers/            # Auth, Diary, Profile, AI
+│       ├── Middleware/             # ExceptionHandler, JwtMiddleware
+│       └── Program.cs              # Konfiguracja DI
 │
-├── tests/                              # Testy automatyczne
-│   ├── FitApp.UnitTests/               # Logika domenowa i komendy MediatR
-│   └── FitApp.IntegrationTests/        # Testy API (dostęp do bazy in-memory/test-container)
+├── tests/                          # Testy jednostkowe i integracyjne
 │
-└── FitApp.Client/                      # Frontend (React + TS)
+└── FitApp.Client/                  # Frontend (React + TS)
     ├── src/
-    │   ├── api/                        # Axios instances (base URLs, interceptory JWT)
-    │   ├── features/                   # Moduły funkcjonalne (Vertical Slices)
-    │   │   ├── auth/                   # Login, Register, UserContext
-    │   │   ├── diet/                   # Diary, MealLog, FoodSearch, BarcodeScanner
-    │   │   ├── measurements/           # WeightChart, MeasurementForm
-    │   │   └── ai/                     # PhotoUpload, AiChatWindow
-    │   ├── components/                 # Współdzielone UI (Button, Input, Modal, Card)
-    │   ├── hooks/                      # Custom hooks (useAuth, useLocalStorage, useDebounce)
-    │   ├── types/                      # Interfejsy TypeScript (Food, User, Diary)
-    │   ├── lib/                        # Konfiguracja (tailwind, shadcn, queryClient)
-    │   ├── utils/                      # Helpery (formatowanie dat, przeliczanie makro)
-    │   ├── App.tsx                     # Routing i Providey
-    │   └── main.tsx                    # Entry point
-    ├── public/                         # Zasoby statyczne (ikony, manifest PWA)
-    ├── .env                            # Zmienne (VITE_API_URL)
-    ├── tailwind.config.js
-    └── vite.config.ts
-
-📅 Plan iteracji (Core Edition)EtapZakresMVPAuth, Profil, TDEE, Dziennik posiłków, Skaner kodów.V2Pomiary ciała, Wykresy (Recharts), Cache Redis, Optymalizacja zapytań SQL.AI UpdateIntegracja z Claude API, Analiza zdjęć, Czat z trenerem AI.
+    │   ├── api/                    # Instancje Axios, interceptory JWT
+    │   ├── features/               # auth, diet, measurements, ai
+    │   ├── components/             # Reusable UI (shadcn)
+    │   ├── hooks/                  # Custom hooks (useAuth, useDebounce)
+    │   └── App.tsx                 # Routing i Provider-y
