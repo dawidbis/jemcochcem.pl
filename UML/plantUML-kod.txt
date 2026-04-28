@@ -1,0 +1,260 @@
+@startuml Domain_Layer
+skinparam classAttributeIconSize 0
+
+package "Entities" {
+    class User {
+        + Guid Id
+        + String Email
+        + String PasswordHash
+        + CalorieGoal Goal
+        + void SetNewGoal(CalorieGoal goal)
+    }
+
+    class MealLog {
+        + Guid Id
+        + Guid UserId
+        + DateTime Date
+        + List<MealLogItem> Items
+        + MacroNutrients GetTotalMacros()
+    }
+
+    class MealLogItem {
+        + Guid Id
+        + Guid FoodProductId
+        + double WeightGrams
+        + MacroNutrients CalculatedMacros
+        + void Recalculate(MacroNutrients baseMacros)
+    }
+
+    class FoodProduct {
+        + String Barcode
+        + String Name
+        + MacroNutrients MacrosPer100g
+    }
+
+    class BodyMeasurement {
+        + DateTime MeasuredAt
+        + double Weight
+        + double BodyFat
+    }
+}
+
+package "ValueObjects" {
+    class MacroNutrients {
+        + double Protein
+        + double Carbs
+        + double Fat
+        + int Kcal
+        + {static} MacroNutrients Zero()
+    }
+    
+    class CalorieGoal {
+        + int DailyKcal
+        + double ProteinTarget
+        + double CarbsTarget
+        + double FatTarget
+    }
+}
+
+package "Interfaces (Repositories)" {
+    interface IFoodRepository {
+        + Task<FoodProduct> GetByBarcode(string code)
+        + Task AddAsync(FoodProduct product)
+    }
+    interface IUserRepository {
+        + Task<User> GetById(Guid id)
+    }
+}
+
+MealLog "1" *-- "*" MealLogItem
+MealLogItem "0..*" o-- "1" FoodProduct
+User "1" *-- "1" CalorieGoal
+@enduml
+
+@startuml Application_Layer
+skinparam classAttributeIconSize 0
+
+package "Features.Diet" {
+    class AddMealItemCommand {
+        + Guid FoodId
+        + double Grams
+        + DateTime Date
+    }
+    class AddMealItemHandler {
+        - IMealLogRepository _repo
+        + Task<Guid> Handle(AddMealItemCommand cmd)
+    }
+}
+
+package "Features.AI" {
+    class AnalyzePhotoCommand {
+        + byte[] PhotoBytes
+    }
+    class AnalyzePhotoHandler {
+        - IClaudeAiService _ai
+        + Task<AiResultDto> Handle(AnalyzePhotoCommand cmd)
+    }
+}
+
+package "DTOs" {
+    class DiaryDto {
+        + DateTime Date
+        + List<MealItemDto> Items
+        + MacroNutrients Summary
+    }
+    class FoodProductDto {
+        + String Name
+        + int Kcal
+    }
+}
+
+package "Interfaces (Services)" {
+    interface IClaudeAiService {
+        + Task<string> AskCoach(string msg)
+        + Task<AiResultDto> AnalyzePhoto(byte[] img)
+    }
+    interface IOffApiClient {
+        + Task<FoodProductDto> FetchFromExternal(string code)
+    }
+}
+@enduml
+
+@startuml Infrastructure_Layer
+skinparam classAttributeIconSize 0
+
+package "Persistence" {
+    class AppDbContext {
+        + DbSet<User> Users
+        + DbSet<MealLog> Logs
+        + DbSet<FoodProduct> Products
+        # void OnModelCreating(ModelBuilder mb)
+    }
+    class FoodRepository implements FitApp.Domain.Interfaces.IFoodRepository {
+        - AppDbContext _context
+        + Task<FoodProduct> GetByBarcode(string code)
+    }
+}
+
+package "External" {
+    class ClaudeAiService implements IClaudeAiService {
+        - HttpClient _http
+        - string _apiKey
+        + Task<AiResultDto> AnalyzePhoto(byte[] img)
+    }
+    class RedisCacheService {
+        - IDistributedCache _cache
+        + Task SetAsync(string key, object val)
+    }
+}
+@enduml
+
+@startuml API_Layer
+skinparam classAttributeIconSize 0
+
+package "Controllers" {
+    class DiaryController {
+        - IMediator _mediator
+        + Task<IActionResult> GetToday()
+        + Task<IActionResult> AddItem(AddMealItemRequest req)
+    }
+    class AIController {
+        - IMediator _mediator
+        + Task<IActionResult> UploadPhoto(IFormFile file)
+        + Task<IActionResult> Chat(ChatRequest req)
+    }
+    class AuthController {
+        + Task<IActionResult> Login(LoginRequest req)
+    }
+}
+
+package "Middleware" {
+    class ExceptionHandler {
+        + Task Invoke(HttpContext context)
+    }
+    class JwtMiddleware {
+        + Task Invoke(HttpContext context)
+    }
+}
+@enduml
+
+@startuml Frontend_Full_Implementation_UML
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #ffffff
+skinparam packageStyle rectangle
+
+package "1. API & Types (Data Layer)" {
+    class ApiClient <<Singleton>> {
+        - axiosInstance: Axios
+        + get<T>(url: string): Promise<T>
+        + post<T>(url: string, data: any): Promise<T>
+        - setupInterceptors(): void
+    }
+
+    interface IUser {
+        + id: string
+        + email: string
+        + name: string
+        + goal: ICalorieGoal
+    }
+
+    interface IDiaryEntry {
+        + id: string
+        + foodName: string
+        + grams: number
+        + calories: number
+        + macros: IMacros
+    }
+}
+
+package "2. Custom Hooks (Logic & State Layer)" {
+    class useAuth <<Hook>> {
+        + user: IUser | null
+        + isAuthenticated: boolean
+        + login(credentials: LoginDto): Promise<void>
+        + logout(): void
+    }
+
+    class useDiary <<Hook>> {
+        + entries: IDiaryEntry[]
+        + dailySummary: IMacros
+        + isLoading: boolean
+        + fetchDiary(date: Date): void
+        + addFoodItem(item: AddFoodDto): void
+        + removeFoodItem(id: string): void
+    }
+
+    class useAI <<Hook>> {
+        + isAnalyzing: boolean
+        + chatHistory: IMessage[]
+        + analyzeImage(file: File): Promise<AiAnalysisResult>
+        + sendMessage(msg: string): void
+    }
+}
+
+package "3. Components (UI Layer)" {
+    class DiaryPage <<Component>> {
+        + state: selectedDate
+        - renderMacroSummary()
+        - renderMealList()
+    }
+
+    class FoodScanner <<Component>> {
+        + props: onScanSuccess
+        - startCamera()
+        - processBarcode(code: string)
+    }
+
+    class AiCoach <<Component>> {
+        + state: inputMessage
+        - handleUpload(file: Blob)
+        - displayResponse()
+    }
+}
+
+' Relacje przepływu
+DiaryPage ..> useDiary : consumes
+AiCoach ..> useAI : consumes
+useDiary ..> ApiClient : calls API
+useAI ..> ApiClient : calls API
+useAuth ..> ApiClient : manages tokens
+@enduml
