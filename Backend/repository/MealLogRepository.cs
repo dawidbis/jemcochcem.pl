@@ -14,7 +14,9 @@ public class MealLogRepository : IMealLogRepository
     }
 
     public async Task<MealLog?> GetByIdAsync(Guid id) => 
-        await _context.Logs.FindAsync(id);
+        await _context.Logs
+            .Include(l => l.Items) // <-- TA LINIJKA JEST KLUCZOWA
+            .FirstOrDefaultAsync(l => l.Id == id);
 
     public async Task UpdateAsync(MealLog mealLog)
     {

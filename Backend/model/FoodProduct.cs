@@ -1,9 +1,8 @@
 namespace FitApp.Domain.Entities;
 
-/// <summary>
-/// Zaślepka encji. Zostanie w pełni zaimplementowana w ramach Punktu 5.
-/// </summary>
 public class FoodProduct
 {
     public string Barcode { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public MacroNutrients MacrosPer100g { get; set; } = MacroNutrients.Zero();
 }

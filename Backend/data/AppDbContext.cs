@@ -16,7 +16,19 @@ public class AppDbContext : DbContext
         // Ustawienie Barcode jako klucza głównego dla FoodProduct
         mb.Entity<FoodProduct>().HasKey(f => f.Barcode);
         
-        // Kolega rozszerzy OnModelCreating o relacje encji w punkcie 5.
+        // --- RELACJE Z PUNKTU 5 ---
+
+        // 1. Konfiguracja tzw. Value Objects (obiekty bez własnego ID, osadzone w innych tabelach)
+        mb.Entity<User>().OwnsOne(u => u.Goal);
+        mb.Entity<FoodProduct>().OwnsOne(f => f.MacrosPer100g);
+        mb.Entity<MealLogItem>().OwnsOne(i => i.CalculatedMacros);
+
+        // 2. Relacja jeden-do-wielu: Dziennik posiłków (1) -> Pozycje w dzienniku (Wiele)
+        mb.Entity<MealLog>()
+            .HasMany(m => m.Items)
+            .WithOne()
+            .HasForeignKey("MealLogId");
+
         base.OnModelCreating(mb);
     }
 }
