@@ -117,32 +117,86 @@ FitApp/
 ├── .gitignore
 │
 ├── src/
-│   ├── FitApp.Domain/              # Encje i reguły biznesowe
-│   │   ├── Entities/               # User, MealLog, FoodProduct, BodyMeasurement
-│   │   ├── ValueObjects/           # MacroNutrients, CalorieGoal
-│   │   └── Interfaces/             # Abstrakcje repozytoriów
+│   ├── FitApp.Domain/                  # Warstwa serca (Reguły biznesowe)
+│   │   ├── Entities/                   # User, MealLog, MealLogItem, FoodProduct, BodyMeasurement
+│   │   ├── ValueObjects/               # MacroNutrients (B/W/T), CalorieGoal
+│   │   ├── Interfaces/                 # IUserRepository, IFoodRepository (abstrakcje)
+│   │   └── Exceptions/                 # DomainException
 │   │
-│   ├── FitApp.Application/         # Logika (CQRS + MediatR)
-│   │   ├── Features/               # Diet, Profile, AI, Auth (Vertical Slices)
-│   │   ├── DTOs/                   # Obiekty transferu danych
-│   │   └── Validators/             # FluentValidation
+│   ├── FitApp.Application/             # Warstwa Logiki (CQRS + MediatR)
+│   │   ├── Features/
+│   │   │   ├── Diet/                   # Commands/Queries: AddMealItem, UpdatePortion, GetDailyDiary
+│   │   │   ├── Profile/                # Commands/Queries: UpdateMeasurements, CalculateTdee
+│   │   │   ├── AI/                     # Commands: AnalyzeMealPhoto, AskAiCoach
+│   │   │   └── Auth/                   # Login, Register
+│   │   ├── DTOs/                       # Obiekty transferu danych (UserDto, DiaryDto, FoodDto)
+│   │   ├── Validators/                 # FluentValidation (reguły walidacji danych wejściowych)
+│   │   └── Interfaces/                 # IClaudeAiService, IOffApiClient, IRedisCache
 │   │
-│   ├── FitApp.Infrastructure/      # Implementacje techniczne
-│   │   ├── Data/                   # AppDbContext, Migracje, Repositories
-│   │   ├── ExternalServices/       # OpenFoodFactsClient, ClaudeAiService
-│   │   └── Cache/                  # RedisCacheService (TTL 24h)
+│   ├── FitApp.Infrastructure/          # Warstwa Techniczna (Implementacje)
+│   │   ├── Data/
+│   │   │   ├── AppDbContext.cs         # Konfiguracja EF Core
+│   │   │   ├── Migrations/             # Migracje bazy danych SQL Server
+│   │   │   └── Repositories/           # Implementacje dostępu do danych
+│   │   ├── ExternalServices/
+│   │   │   ├── OpenFoodFactsClient.cs  # Integracja z zewnętrzną bazą produktów
+│   │   │   └── ClaudeAiService.cs      # Integracja z modelem językowym Anthropic
+│   │   └── Cache/
+│   │       └── RedisCacheService.cs    # Buforowanie wyników wyszukiwania (TTL 24h)
 │   │
-│   └── FitApp.API/                 # Prezentacja (Endpointy)
-│       ├── Controllers/            # Auth, Diary, Profile, AI
-│       ├── Middleware/             # ExceptionHandler, JwtMiddleware
-│       └── Program.cs              # Konfiguracja DI
+│   └── FitApp.API/                     # Warstwa Prezentacji (REST Endpointy)
+│       ├── Controllers/
+│       │   ├── AuthController.cs
+│       │   ├── DiaryController.cs
+│       │   ├── ProfileController.cs
+│       │   └── AIController.cs
+│       ├── Middleware/
+│       │   ├── ExceptionHandler.cs     # Globalna obsługa błędów
+│       │   └── JwtMiddleware.cs        # Walidacja tokenów bezpieczeństwa
+│       └── Program.cs                  # Rejestracja usług i middleware
 │
-├── tests/                          # Testy jednostkowe i integracyjne
+├── tests/                              # Testy automatyczne
+│   ├── FitApp.UnitTests/               # Testy jednostkowe logiki biznesowej
+│   └── FitApp.IntegrationTests/        # Testy integracyjne API
 │
-└── FitApp.Client/                  # Frontend (React + TS)
+└── FitApp.Client/                      # Frontend (React 18 + TS + Vite)
     ├── src/
-    │   ├── api/                    # Instancje Axios, interceptory JWT
-    │   ├── features/               # auth, diet, measurements, ai
-    │   ├── components/             # Reusable UI (shadcn)
-    │   ├── hooks/                  # Custom hooks (useAuth, useDebounce)
-    │   └── App.tsx                 # Routing i Provider-y
+    │   ├── api/                        # Konfiguracja Axios i interceptory JWT
+    │   ├── features/                   # Moduły funkcjonalne (Vertical Slices)
+    │   │   ├── auth/                   # Komponenty logowania i rejestracji
+    │   │   ├── diet/                   # Dziennik, wyszukiwarka, skaner kodów
+    │   │   ├── measurements/           # Wykresy wagi i formularze pomiarów
+    │   │   └── ai/                     # Upload zdjęć i okno czatu z AI
+    │   ├── components/                 # Współdzielone UI (Button, Input, Card - shadcn)
+    │   ├── hooks/                      # Customowe hooki (useAuth, useDebounce)
+    │   ├── types/                      # Wspólne interfejsy TypeScript
+    │   ├── lib/                        # Konfiguracja bibliotek (Tailwind, QueryClient)
+    │   ├── utils/                      # Formaty dat, obliczenia matematyczne
+    │   ├── App.tsx                     # Główny router i dostawcy stanu
+    │   └── main.tsx                    # Punkt wejścia aplikacji
+    ├── public/                         # Pliki statyczne
+    ├── .env                            # Konfiguracja środowiskowa (API URL)
+    ├── tailwind.config.js
+    └── vite.config.ts
+
+-------------------------------------------------------------------------
+PLAN ITERACJI (Core Edition)
+-------------------------------------------------------------------------
+
+Etap I: MVP (Minimum Viable Product)
+- System autoryzacji (JWT: Register/Login).
+- Profil użytkownika + automatyczny kalkulator zapotrzebowania TDEE.
+- Podstawowy dziennik posiłków (dodawanie/usuwanie pozycji).
+- Integracja z Open Food Facts (wyszukiwanie produktów + skaner kodów).
+
+Etap II: Analityka i Cache
+- Moduł pomiarów ciała (waga, obwody) z historią.
+- Wizualizacja postępów na wykresach (Recharts).
+- Wdrożenie Redis Cache dla wyników wyszukiwania produktów.
+- Optymalizacja bazy danych (indeksy pod daty i UserId).
+
+Etap III: AI Update
+- Integracja z Claude AI API (Anthropic).
+- Moduł "Analyze Photo" (estymacja kalorii na podstawie przesłanego zdjęcia).
+- Czat z AI Coachem (porady dietetyczne w oparciu o kontekst użytkownika).
+- Eksport raportów tygodniowych do formatu tekstowego/PDF.
