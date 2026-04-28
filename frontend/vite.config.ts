@@ -7,9 +7,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000', // Adres Twojego API .NET
+        target: 'http://localhost:5219', // Adres Twojego API .NET
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''), // Usuwa /api przed wysłaniem do .NET
       }
     }
   }
