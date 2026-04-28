@@ -178,7 +178,7 @@ FitApp/
     ├── .env                            # Konfiguracja środowiskowa (API URL)
     ├── tailwind.config.js
     └── vite.config.ts
-
+```
 -------------------------------------------------------------------------
 PLAN ITERACJI (Core Edition)
 -------------------------------------------------------------------------
