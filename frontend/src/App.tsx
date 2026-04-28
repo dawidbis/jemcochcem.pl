@@ -5,7 +5,7 @@ function App() {
   const [data, setData] = useState([])
 
   useEffect(() => {
-    fetch('/api/weatherforecast')
+    fetch('/api/food')
       .then(res => res.json())
       .then(json => setData(json))
       .catch(err => console.error("Błąd:", err))
