@@ -31,28 +31,28 @@ if ($toolName -eq "execute_command" -or $toolName -eq "bash") {
     # Blokuj rm -rf na ważnych folderach
     if ($command -match "rm\s+-rf\s+(/|~|\.\.|Backend|frontend|UML)") {
         $shouldCancel = $true
-        $cancelReason = "🚫 ZABLOKOWANO: Niebezpieczne usuwanie ($command)"
+        $cancelReason = " ZABLOKOWANO: Niebezpieczne usuwanie ($command)"
     }
     
     # Blokuj force push do main/master
     if ($command -match "git\s+push\s+.*--force.*\b(main|master)\b") {
         $shouldCancel = $true
-        $cancelReason = "🚫 ZABLOKOWANO: Force push do main/master jest niebezpieczny!"
+        $cancelReason = " ZABLOKOWANO: Force push do main/master jest niebezpieczny!"
     }
     
     # Blokuj git reset --hard bez backup
     if ($command -match "git\s+reset\s+--hard") {
-        $warnings += "⚠️  UWAGA: git reset --hard usunie wszystkie nieskommitowane zmiany!"
+        $warnings += "  UWAGA: git reset --hard usunie wszystkie nieskommitowane zmiany!"
     }
     
     # Blokuj operacje na .env
     if ($command -match "(rm|cat|echo).*\.env") {
-        $warnings += "⚠️  UWAGA: Operacja na pliku .env - może zawierać sekrety!"
+        $warnings += "  UWAGA: Operacja na pliku .env - może zawierać sekrety!"
     }
     
     # Blokuj instalację globalnych pakietów bez pytania
     if ($command -match "npm\s+install\s+-g") {
-        $warnings += "⚠️  UWAGA: Globalna instalacja npm package - upewnij się że to bezpieczne!"
+        $warnings += "  UWAGA: Globalna instalacja npm package - upewnij się że to bezpieczne!"
     }
 }
 
@@ -76,14 +76,14 @@ if ($toolName -eq "write_to_file" -or $toolName -eq "replace_in_file") {
     
     foreach ($critical in $criticalFiles) {
         if ($filePath -like "*$critical*") {
-            $warnings += "⚠️  Modyfikacja krytycznego pliku: $critical"
+            $warnings += "  Modyfikacja krytycznego pliku: $critical"
         }
     }
     
     # Blokuj modyfikacje w node_modules / bin / obj
     if ($filePath -match "(node_modules|bin\\Debug|obj\\Debug)") {
         $shouldCancel = $true
-        $cancelReason = "🚫 ZABLOKOWANO: Nie modyfikuj plików w $filePath"
+        $cancelReason = " ZABLOKOWANO: Nie modyfikuj plików w $filePath"
     }
 }
 

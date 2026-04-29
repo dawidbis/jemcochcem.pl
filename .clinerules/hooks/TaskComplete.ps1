@@ -16,14 +16,14 @@ $report = @()
 $hasErrors = $false
 $hasWarnings = $false
 
-$report += "🔍 TaskComplete: Weryfikacja zakończonego zadania..."
+$report += "[CHECK] TaskComplete: Weryfikacja zakonczoneego zadania..."
 $report += ""
 
 # ============================================
 # 1. BACKEND: Kompilacja + Testy
 # ============================================
 if (Test-Path "Backend") {
-    $report += "🔧 Backend (C#):"
+    $report += "[BUILD] Backend (C#):"
     
     # Kompilacja
     $report += "  → Kompilacja..."
@@ -31,14 +31,14 @@ if (Test-Path "Backend") {
     try {
         $buildOutput = dotnet build --no-restore 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
-            $report += "    ❌ BŁĄD KOMPILACJI:"
+            $report += "     BLAD KOMPILACJI:"
             $report += $buildOutput
             $hasErrors = $true
         } else {
-            $report += "    ✅ Kompilacja OK"
+            $report += "     Kompilacja OK"
         }
     } catch {
-        $report += "    ⚠️  Nie można uruchomić dotnet build"
+        $report += "      Nie mozna uruchomic dotnet build"
         $hasWarnings = $true
     }
     Pop-Location
@@ -50,14 +50,14 @@ if (Test-Path "Backend") {
         try {
             $testOutput = dotnet test --no-build 2>&1 | Out-String
             if ($LASTEXITCODE -ne 0) {
-                $report += "    ❌ TESTY NIE PRZESZŁY:"
+                $report += "     TESTY NIE PRZESZLY:"
                 $report += $testOutput
                 $hasErrors = $true
             } else {
-                $report += "    ✅ Wszystkie testy przeszły"
+                $report += "     Wszystkie testy przeszly"
             }
         } catch {
-            $report += "    ⚠️  Nie można uruchomić testów"
+            $report += "      Nie mozna uruchomic testow"
             $hasWarnings = $true
         }
         Pop-Location
@@ -69,7 +69,7 @@ if (Test-Path "Backend") {
 # ============================================
 if (Test-Path "frontend") {
     $report += ""
-    $report += "⚛️  Frontend (TypeScript):"
+    $report += "  Frontend (TypeScript):"
     
     Push-Location "frontend"
     
@@ -78,14 +78,14 @@ if (Test-Path "frontend") {
     try {
         $typeOutput = npm run type-check 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
-            $report += "    ❌ BŁĘDY TYPÓW:"
+            $report += "     BLEDY TYPOW:"
             $report += $typeOutput
             $hasErrors = $true
         } else {
-            $report += "    ✅ Typy OK"
+            $report += "     Typy OK"
         }
     } catch {
-        $report += "    ⚠️  Brak skryptu type-check"
+        $report += "      Brak skryptu type-check"
         $hasWarnings = $true
     }
     
@@ -94,13 +94,13 @@ if (Test-Path "frontend") {
     try {
         $lintOutput = npm run lint 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
-            $report += "    ⚠️  Ostrzeżenia ESLint"
+            $report += "      Ostrzezenia ESLint"
             $hasWarnings = $true
         } else {
-            $report += "    ✅ Linter OK"
+            $report += "     Linter OK"
         }
     } catch {
-        $report += "    ⚠️  Brak skryptu lint"
+        $report += "      Brak skryptu lint"
     }
     
     # Testy
@@ -108,30 +108,30 @@ if (Test-Path "frontend") {
     try {
         $testOutput = npm run test 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
-            $report += "    ❌ TESTY NIE PRZESZŁY:"
+            $report += "     TESTY NIE PRZESZLY:"
             $hasErrors = $true
         } else {
-            $report += "    ✅ Testy OK"
+            $report += "     Testy OK"
         }
     } catch {
-        $report += "    ⚠️  Brak skryptu test"
+        $report += "      Brak skryptu test"
     }
     
     Pop-Location
 }
 
 # ============================================
-# 3. CODE REVIEW - Szukaj typowych problemów
+# 3. CODE REVIEW - Szukaj typowych problemow
 # ============================================
 $report += ""
-$report += "📊 Code Review:"
+$report += "[REVIEW] Code Review:"
 
 # Szukaj console.log w plikach TS/TSX
 $consoleLogs = Get-ChildItem -Path "frontend/src" -Recurse -Include "*.ts","*.tsx" -ErrorAction SilentlyContinue | 
     Select-String -Pattern "console\.log" -ErrorAction SilentlyContinue
 
 if ($consoleLogs) {
-    $report += "  ❌ Znaleziono console.log() w:"
+    $report += "   Znaleziono console.log() w:"
     $consoleLogs | ForEach-Object { $report += "     - $($_.Path):$($_.LineNumber)" }
     $hasErrors = $true
 }
@@ -141,7 +141,7 @@ $anyTypes = Get-ChildItem -Path "frontend/src" -Recurse -Include "*.ts","*.tsx" 
     Select-String -Pattern ":\s*any\b" -ErrorAction SilentlyContinue
 
 if ($anyTypes) {
-    $report += "  ⚠️  Użyto 'any' type w:"
+    $report += "    Uzyto 'any' type w:"
     $anyTypes | Select-Object -First 5 | ForEach-Object { $report += "     - $($_.Path):$($_.LineNumber)" }
     $hasWarnings = $true
 }
@@ -151,7 +151,7 @@ $badCatches = Get-ChildItem -Path "Backend" -Recurse -Include "*.cs" -ErrorActio
     Select-String -Pattern "catch\s*\(\s*Exception\s*\)\s*\{" -ErrorAction SilentlyContinue
 
 if ($badCatches) {
-    $report += "  ⚠️  Catch bez logowania w:"
+    $report += "    Catch bez logowania w:"
     $badCatches | Select-Object -First 5 | ForEach-Object { $report += "     - $($_.Path):$($_.LineNumber)" }
     $hasWarnings = $true
 }
@@ -160,20 +160,20 @@ if ($badCatches) {
 # 4. PODSUMOWANIE
 # ============================================
 $report += ""
-$report += "═══════════════════════════════════════"
+$report += "======================================="
 if ($hasErrors) {
-    $report += "❌ ZNALEZIONO BŁĘDY KRYTYCZNE - NAPRAW PRZED COMMITEM!"
+    $report += "[ERROR] ZNALEZIONO BLEDY KRYTYCZNE - NAPRAW PRZED COMMITEM!"
 } elseif ($hasWarnings) {
-    $report += "⚠️  Znaleziono ostrzeżenia - rozważ poprawienie"
+    $report += "[WARN] Znaleziono ostrzezenia - rozwaz poprawienie"
 } else {
-    $report += "✅ Wszystko OK - kod gotowy do commita!"
+    $report += "[OK] Wszystko OK - kod gotowy do commita!"
 }
-$report += "═══════════════════════════════════════"
+$report += "======================================="
 
 $reportText = $report -join "`n"
 
 @{
     cancel = $false
     contextModification = $reportText
-    errorMessage = if ($hasErrors) { "Znaleziono błędy w kodzie" } else { "" }
+    errorMessage = if ($hasErrors) { "Znaleziono bledy w kodzie" } else { "" }
 } | ConvertTo-Json -Compress
