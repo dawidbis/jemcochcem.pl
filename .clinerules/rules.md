@@ -1,15 +1,15 @@
-# 🤖 Zasady Cline — Projekt FitApp
+#  Zasady Cline — Projekt FitApp
 
-## 🗣️ STYL KOMUNIKACJI
+## STYL KOMUNIKACJI
 
 **Pisz jak neandertalczyk! Prosto, konkretnie, bez zbędnych słów.**
 
 ### Wzór komunikacji:
 ```
-✅ DOBRZE:
+ DOBRZE:
 "Ja robić endpoint. Dodać AddMealItemCommand. Testować dotnet build."
 
-❌ ŹLE:
+ ŹLE:
 "Przystępuję do implementacji endpointu, który będzie obsługiwał dodawanie posiłków. 
 W ramach tego zadania utworzę klasę AddMealItemCommand zgodnie z wzorcem CQRS..."
 ```
@@ -22,14 +22,14 @@ W ramach tego zadania utworzę klasę AddMealItemCommand zgodnie z wzorcem CQRS.
 
 ---
 
-## 📚 Obowiązkowa Lektura Przed Każdym Zadaniem
+##  Obowiązkowa Lektura Przed Każdym Zadaniem
 
 1. **`README.md`** — Tech stack, struktura projektu, iteracja (MVP/Analytics/AI)
 2. **`UML/plantUML-kod.txt`** — Architektura Clean Architecture, flow danych
 
 ---
 
-## ✅ Checklist
+##  Checklist
 
 ### Przed kodem:
 - [ ] Przeczytaj `README.md` → sekcja "Stack technologiczny" + "Plan iteracji"
@@ -46,7 +46,7 @@ W ramach tego zadania utworzę klasę AddMealItemCommand zgodnie z wzorcem CQRS.
 
 ---
 
-## 📁 Nazewnictwo Plików
+##  Nazewnictwo Plików
 
 ### Backend (C#)
 ```
@@ -60,7 +60,7 @@ UserRepository.cs                  // Implementacja bez I
 **Struktura Backend (Clean Architecture):**
 ```
 Backend/
-├── FitApp.Domain/           # ⚠️ CORE - zero dependencies!
+├── FitApp.Domain/           #  CORE - zero dependencies!
 │   ├── Entities/            # User.cs, MealLog.cs
 │   ├── ValueObjects/        # MacroNutrients.cs
 │   └── Interfaces/          # IUserRepository.cs
@@ -112,7 +112,7 @@ frontend/src/
 
 ---
 
-## 🔧 Stack Technologiczny (z README.md)
+##  Stack Technologiczny (z README.md)
 
 ### Backend
 - **C# ASP.NET Core 8** → REST API
@@ -132,7 +132,7 @@ frontend/src/
 
 ---
 
-## 💬 OBOWIĄZKOWE Komentarze
+##  OBOWIĄZKOWE Komentarze
 
 ### Wzór:
 ```
@@ -179,17 +179,17 @@ export function useDiary(date: Date) {
 
 ---
 
-## 🚫 Zakazy
+##  Zakazy
 
 ### Backend:
 ```csharp
-// ❌ ZAKAZANE
+//  ZAKAZANE
 public class user { }                                          // Małe litery w klasach
 public void DoSomething(dynamic data) { }                      // 'dynamic' bez powodu
 catch (Exception) { }                                          // Catch bez logowania
 var result = _db.Query($"SELECT * FROM Users WHERE Id = {id}"); // SQL injection!
 
-// ✅ POPRAWNE
+//  POPRAWNE
 public class User { }
 public void DoSomething(UserDto data) { }
 catch (Exception ex) { _logger.LogError(ex, "Error"); }
@@ -198,12 +198,12 @@ var result = await _userRepository.GetByIdAsync(userId);
 
 ### Frontend:
 ```typescript
-// ❌ ZAKAZANE
+//  ZAKAZANE
 console.log('debug');                                    // Usuń przed commitem
 <div dangerouslySetInnerHTML={{ __html: userInput }} />  // XSS!
 const data: any = response;                              // Unikaj 'any'
 
-// ✅ POPRAWNE  
+// POPRAWNE  
 // (bez console.log)
 <div>{userInput}</div>                                   // React auto-escapes
 const data: UserResponse = response;
@@ -223,7 +223,7 @@ const data: UserResponse = response;
 
 ---
 
-## 📝 Przykład właściwego workflow:
+##  Przykład właściwego workflow:
 
 ```
 User: "Dodaj endpoint do logowania posiłków"

@@ -11,22 +11,22 @@ Workflows to zautomatyzowane sekwencje kroków dla powtarzalnych procesów.
 **Trigger:** `/feature`
 
 **Kroki:**
-1. 📚 Czyta `README.md` → sprawdza iterację (MVP/Analytics/AI)
-2. 🎨 Czyta `UML/plantUML-kod.txt` → planuje architekturę
-3. 🔍 Szuka podobnego kodu w projekcie
-4. 💬 Pyta użytkownika o szczegóły:
+1. Czyta `README.md` → sprawdza iterację (MVP/Analytics/AI)
+2.  Czyta `UML/plantUML-kod.txt` → planuje architekturę
+3.  Szuka podobnego kodu w projekcie
+4. Pyta użytkownika o szczegóły:
    - Nazwa feature?
    - Warstwa (Backend/Frontend/Both)?
    - Dodatkowe wymagania?
-5. 🏗️ Tworzy strukturę:
+5.  Tworzy strukturę:
    - **Backend:** Command + Handler + Validator + Controller
    - **Frontend:** Component + Hook + API client + Types
-6. 🧪 Generuje testy:
+6.  Generuje testy:
    - Backend: xUnit tests
    - Frontend: Vitest tests
-7. 📝 Dodaje komentarze do każdego pliku
-8. ✅ Uruchamia pre-commit checks
-9. 📋 Tworzy checklist do code review
+7.  Dodaje komentarze do każdego pliku
+8.  Uruchamia pre-commit checks
+9.  Tworzy checklist do code review
 
 **Przykład użycia:**
 ```
@@ -39,7 +39,7 @@ Cline: Backend, Frontend, czy Both?
 User: Both
 
 Cline: [tworzy Command, Handler, Component, Hook, testy...]
-Cline: ✅ Feature gotowy! Checklist do review:
+Cline:  Feature gotowy! Checklist do review:
        - [ ] Testy przechodzą
        - [ ] Komentarze dodane
        - [ ] Clean Architecture zachowana
@@ -47,21 +47,21 @@ Cline: ✅ Feature gotowy! Checklist do review:
 
 ---
 
-## 🐛 /bugfix - Naprawa błędu
+##  /bugfix - Naprawa błędu
 
 **Trigger:** `/bugfix`
 
 **Kroki:**
-1. 💬 Pyta o opis buga
-2. 🔍 Szuka podobnych bugów w issues/commits
-3. 📂 Lokalizuje plik z bugiem
-4. 🧪 Tworzy test reprodukujący bug (RED)
-5. 🔧 Naprawia kod
-6. ✅ Sprawdza czy test przechodzi (GREEN)
-7. 🎨 Refactor jeśli potrzebny
-8. 📝 Dodaje komentarz wyjaśniający fix
-9. ✅ Uruchamia wszystkie testy
-10. 📋 Generuje commit message
+1.  Pyta o opis buga
+2.  Szuka podobnych bugów w issues/commits
+3.  Lokalizuje plik z bugiem
+4.  Tworzy test reprodukujący bug (RED)
+5.  Naprawia kod
+6.  Sprawdza czy test przechodzi (GREEN)
+7.  Refactor jeśli potrzebny
+8.  Dodaje komentarz wyjaśniający fix
+9.  Uruchamia wszystkie testy
+10.  Generuje commit message
 
 **Przykład:**
 ```
@@ -74,13 +74,13 @@ Cline: [Szuka w frontend/src/features/diet/...]
 Cline: Znalazłem problem w useDiary.ts - brak invalidateQueries
 Cline: [Tworzy test reprodukujący bug]
 Cline: [Naprawia kod]
-Cline: ✅ Test przechodzi!
+Cline:  Test przechodzi!
 Cline: Sugerowany commit: "fix(diet): dodano invalidateQueries po dodaniu posiłku"
 ```
 
 ---
 
-## 🧪 /test-gen - Generowanie testów
+##  /test-gen - Generowanie testów
 
 **Trigger:** `/test-gen`
 
@@ -103,14 +103,14 @@ Cline: Znaleziono 3 pliki bez testów:
        - useDiary.ts
        
 Cline: [Generuje testy...]
-Cline: ✅ Wygenerowano 3 pliki testowe
+Cline:  Wygenerowano 3 pliki testowe
 Cline: Coverage: 67% → 85%
-Cline: 💡 Sprawdź TODO w testach i uzupełnij edge cases
+Cline:  Sprawdź TODO w testach i uzupełnij edge cases
 ```
 
 ---
 
-## 🔧 /refactor - Refaktoryzacja
+##  /refactor - Refaktoryzacja
 
 **Trigger:** `/refactor [ścieżka]`
 
@@ -145,27 +145,27 @@ Cline: Wykonać? [tak/nie]
 User: tak
 
 Cline: [Refaktoryzuje krok po kroku]
-Cline: ✅ Wszystkie testy przechodzą
+Cline:  Wszystkie testy przechodzą
 ```
 
 ---
 
-## 📦 /release - Przygotowanie release
+##  /release - Przygotowanie release
 
 **Trigger:** `/release`
 
 **Kroki:**
-1. ✅ Wszystkie testy przechodzą
-2. ✅ Brak `console.log()` w kodzie
-3. ✅ Wszystkie TODO rozwiązane lub udokumentowane
-4. 📝 Generuje CHANGELOG.md
-5. 🏷️ Sugeruje numer wersji (semantic versioning)
-6. 📄 Tworzy release notes
-7. 🚀 Przygotowuje build production
+1.  Wszystkie testy przechodzą
+2.  Brak `console.log()` w kodzie
+3.  Wszystkie TODO rozwiązane lub udokumentowane
+4.  Generuje CHANGELOG.md
+5.  Sugeruje numer wersji (semantic versioning)
+6.  Tworzy release notes
+7.  Przygotowuje build production
 
 ---
 
-## 🔍 /review - Code Review przed PR
+##  /review - Code Review przed PR
 
 **Trigger:** `/review`
 
@@ -178,31 +178,31 @@ Cline: ✅ Wszystkie testy przechodzą
 
 **Output:**
 ```
-📊 PRE-PR REVIEW REPORT
+ PRE-PR REVIEW REPORT
 
 Changed files: 5
 Lines added: +234
 Lines removed: -45
 
-✅ Code Quality: 8/10
-✅ Test Coverage: 87%
-✅ Security: No issues
-⚠️  Performance: 1 warning
-✅ Architecture: OK
+ Code Quality: 8/10
+ Test Coverage: 87%
+ Security: No issues
+  Performance: 1 warning
+ Architecture: OK
 
-📋 PR Checklist:
+ PR Checklist:
 - [x] Tests passing
 - [x] Comments added
 - [x] No console.log
 - [x] Naming conventions OK
 - [ ] Manual testing needed
 
-🎯 Ready for PR? Tak (po manualnym teście)
+ Ready for PR? Tak (po manualnym teście)
 ```
 
 ---
 
-## 🌐 /e2e - Testy E2E
+##  /e2e - Testy E2E
 
 **Trigger:** `/e2e`
 
@@ -221,7 +221,7 @@ Lines removed: -45
 
 ---
 
-## 🆕 Tworzenie własnego workflow
+##  Tworzenie własnego workflow
 
 **Plik:** `.cline/workflows/custom-name.md`
 
@@ -241,7 +241,7 @@ Lines removed: -45
 
 ---
 
-## 📋 Lista wszystkich workflow
+##  Lista wszystkich workflow
 
 | Trigger | Opis |
 |---------|------|

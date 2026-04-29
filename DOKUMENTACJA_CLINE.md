@@ -1,6 +1,6 @@
-# 📖 Dokumentacja Cline - Projekt FitApp
+#  Dokumentacja Cline - Projekt FitApp
 
-## 🎯 Czym jest Cline?
+##  Czym jest Cline?
 
 Cline to AI asystent programisty zintegrowany z VS Code. Pomaga w:
 - Pisaniu kodu zgodnie z Clean Architecture
@@ -10,7 +10,7 @@ Cline to AI asystent programisty zintegrowany z VS Code. Pomaga w:
 
 ---
 
-## 🗂️ Struktura Projektu
+##  Struktura Projektu
 
 ### `.clinerules/` - Zasady i Konfiguracja
 
@@ -40,7 +40,7 @@ Cline to AI asystent programisty zintegrowany z VS Code. Pomaga w:
 
 ---
 
-## 🚀 Jak Używać Cline?
+##  Jak Używać Cline?
 
 ### 1. Podstawowe Komendy
 
@@ -78,17 +78,17 @@ Cline to AI asystent programisty zintegrowany z VS Code. Pomaga w:
 
 ---
 
-## 📋 Zasady Komunikacji
+##  Zasady Komunikacji
 
-### ✅ Styl Neandertalczyka
+###  Styl Neandertalczyka
 
 Cline komunikuje się **krótko i konkretnie**:
 
 ```
-✅ DOBRZE:
+DOBRZE:
 "Ja robić endpoint. Dodać AddMealItemCommand. Testować dotnet build."
 
-❌ ŹLE:
+ ŹLE:
 "Przystępuję do implementacji endpointu, który będzie obsługiwał 
 dodawanie posiłków. W ramach tego zadania utworzę klasę..."
 ```
@@ -101,13 +101,13 @@ dodawanie posiłków. W ramach tego zadania utworzę klasę..."
 
 ---
 
-## 🏗️ Clean Architecture - Zasady
+##  Clean Architecture - Zasady
 
 ### Struktura Warstw
 
 ```
 Backend/
-├── FitApp.Domain/           # ⚠️ CORE - zero dependencies!
+├── FitApp.Domain/           #  CORE - zero dependencies!
 │   ├── Entities/            # User.cs, MealLog.cs
 │   ├── ValueObjects/        # MacroNutrients.cs
 │   └── Interfaces/          # IUserRepository.cs
@@ -148,7 +148,7 @@ DiaryTypes.ts                      # Typy: PascalCase + Types suffix
 
 ---
 
-## 🔧 Stack Technologiczny
+##  Stack Technologiczny
 
 ### Backend
 - **C# ASP.NET Core 8** → REST API
@@ -168,7 +168,7 @@ DiaryTypes.ts                      # Typy: PascalCase + Types suffix
 
 ---
 
-## ✅ Checklist Przed/Po Kodzie
+##  Checklist Przed/Po Kodzie
 
 ### Przed kodem:
 - [ ] Przeczytaj `README.md` → Stack + Plan iteracji
@@ -185,7 +185,7 @@ DiaryTypes.ts                      # Typy: PascalCase + Types suffix
 
 ---
 
-## 💬 Obowiązkowe Komentarze
+##  Obowiązkowe Komentarze
 
 ### Backend (C#)
 ```csharp
@@ -225,17 +225,17 @@ export function useDiary(date: Date) {
 
 ---
 
-## 🚫 Zakazy
+##  Zakazy
 
 ### Backend
 ```csharp
-// ❌ ZAKAZANE
+//  ZAKAZANE
 public class user { }                    // Małe litery w klasach
 public void DoSomething(dynamic data) { } // 'dynamic' bez powodu
 catch (Exception) { }                     // Catch bez logowania
 var result = _db.Query($"SELECT * FROM Users WHERE Id = {id}"); // SQL injection!
 
-// ✅ POPRAWNE
+//  POPRAWNE
 public class User { }
 public void DoSomething(UserDto data) { }
 catch (Exception ex) { _logger.LogError(ex, "Error"); }
@@ -244,12 +244,12 @@ var result = await _userRepository.GetByIdAsync(userId);
 
 ### Frontend
 ```typescript
-// ❌ ZAKAZANE
+//  ZAKAZANE
 console.log('debug');                                    // Usuń przed commitem
 <div dangerouslySetInnerHTML={{ __html: userInput }} />  // XSS!
 const data: any = response;                              // Unikaj 'any'
 
-// ✅ POPRAWNE
+//  POPRAWNE
 // (bez console.log)
 <div>{userInput}</div>                                   // React auto-escapes
 const data: UserResponse = response;
@@ -257,34 +257,33 @@ const data: UserResponse = response;
 
 ---
 
-## 📅 Plan Iteracji
+##  Plan Iteracji
 
 ### Etap I (MVP) - **AKTUALNY**
-- ✅ Autoryzacja (JWT)
-- ✅ Profil użytkownika
-- ✅ Dziennik diety
-- ✅ Open Food Facts API
+-  Autoryzacja (JWT)
+-  Profil użytkownika
+-  Dziennik diety
+-  Open Food Facts API
 
 ### Etap II (Analytics)
-- ⏳ Pomiary ciała
-- ⏳ Wykresy (waga, makroskładniki)
-- ⏳ Redis cache
+-  Pomiary ciała
+-  Wykresy (waga, makroskładniki)
+-  Redis cache
 
 ### Etap III (AI)
-- ⏳ Claude API
-- ⏳ Analiza zdjęć posiłków
-- ⏳ AI Coach
+-  Claude API
+-  Analiza zdjęć posiłków
+-  AI Coach
 
-⚠️ **Nie implementuj funkcji z przyszłych iteracji bez wyraźnego polecenia!**
+ **Nie implementuj funkcji z przyszłych iteracji bez wyraźnego polecenia!**
 
 ---
 
-## 📝 Przykład Workflow
-
+##  Przykład Workflow
 ```
 User: "Dodaj endpoint do logowania posiłków"
 
-✅ GOOD Cline:
+ GOOD Cline:
 1. Czyta README.md → sprawdza Etap I
 2. Czyta plantUML-kod.txt → rozumie warstwy
 3. Szuka podobnego kodu: Ctrl+Shift+F "Command"
@@ -296,7 +295,7 @@ User: "Dodaj endpoint do logowania posiłków"
 5. Dodaje komentarze
 6. Pyta: "Czy mam też stworzyć testy?"
 
-❌ BAD Cline:
+ BAD Cline:
 - Pisze kod bez czytania README/plantUML
 - Tworzy pliki w złych folderach
 - Brak komentarzy
@@ -305,7 +304,7 @@ User: "Dodaj endpoint do logowania posiłków"
 
 ---
 
-## 🛠️ Komendy Pomocnicze
+##  Komendy Pomocnicze
 
 ### Backend
 ```bash
@@ -336,7 +335,7 @@ npm run build
 
 ---
 
-## 🔗 Przydatne Linki
+##  Przydatne Linki
 
 - **README.md** - Główna dokumentacja projektu
 - **UML/plantUML-kod.txt** - Diagramy architektury
@@ -345,7 +344,7 @@ npm run build
 
 ---
 
-## 📞 Wsparcie
+##  Wsparcie
 
 Jeśli Cline:
 - Nie przestrzega zasad → Przypomnij: "Sprawdź .clinerules/rules.md"
