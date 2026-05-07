@@ -1,4 +1,4 @@
-namespace FitApp.Domain.Interfaces;
+namespace FitApp.Infrastructure.Interfaces;
 
 using FitApp.Domain.Entities;
 using System.Threading.Tasks;

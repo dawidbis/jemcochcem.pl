@@ -4,7 +4,7 @@ using FitApp.Application.Interfaces;
 using FitApp.Application.DTOs;
 using System.Net.Http;
 using System.Threading.Tasks;
-using FitApp.Domain.Interfaces;
+using FitApp.Infrastructure.Interfaces;
 
 public class OpenFoodFactsClient : IOffApiClient
 {

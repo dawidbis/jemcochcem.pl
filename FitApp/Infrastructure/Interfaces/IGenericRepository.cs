@@ -1,4 +1,4 @@
-namespace FitApp.Domain.Interfaces;
+namespace FitApp.Infrastructure.Interfaces;
 
 using System;
 using System.Collections.Generic;

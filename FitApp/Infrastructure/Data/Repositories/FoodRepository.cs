@@ -1,7 +1,7 @@
 namespace FitApp.Infrastructure.Data.Repositories;
 
 using FitApp.Domain.Entities;
-using FitApp.Domain.Interfaces;
+using FitApp.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 

@@ -5,7 +5,7 @@ using FitApp.Domain.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using FitApp.Domain.Interfaces;
+using FitApp.Infrastructure.Interfaces;
 
 public class CalculateTdeeCommand : IRequest<int>
 {

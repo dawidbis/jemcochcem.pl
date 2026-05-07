@@ -1,11 +1,14 @@
+using FitApp.Application;
+using FitApp.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 // Serwisy
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-});
+
 
 // Konfiguracja CORS
 builder.Services.AddCors(options => {
@@ -17,6 +20,8 @@ builder.Services.AddCors(options => {
 });
 
 var app = builder.Build();
+app.UseRouting(); 
+app.MapControllers();
 
 // Pipeline
 if (app.Environment.IsDevelopment())

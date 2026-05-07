@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/weatherforecast': {
+      '/diary': {
         target: 'http://localhost:5128', // Adres z FitApp.http
         changeOrigin: true,
         secure: false,

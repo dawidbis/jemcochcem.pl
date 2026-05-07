@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FitApp.Application.DTOs;
-using FitApp.Domain.Interfaces;
+using FitApp.Infrastructure.Interfaces;
 
 public class GetDailyDiaryQuery : IRequest<DiaryDto>
 {

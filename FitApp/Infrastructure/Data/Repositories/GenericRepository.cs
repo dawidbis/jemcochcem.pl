@@ -1,6 +1,6 @@
 namespace FitApp.Infrastructure.Data.Repositories;
 
-using FitApp.Domain.Interfaces;
+using FitApp.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
