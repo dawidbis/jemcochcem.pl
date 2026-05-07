@@ -1,0 +1,101 @@
+@startuml
+
+package "Application.Interfaces" {
+    interface IClaudeAiService {
+        + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
+        + AskCoachAsync(string prompt) Task<string>
+    }
+
+    interface IOffApiClient {
+        + FetchProductByBarcode(string barcode) Task<FoodDto>
+    }
+
+    interface IRedisCache {
+        + GetAsync<T>(string key) Task<T>
+        + SetAsync<T>(string key, T value, TimeSpan ttl) Task
+    }
+}
+
+package "Application.DTOs" {
+    class DiaryDto {
+        + DateTime Date
+        + int TotalCalories
+        + List<MealLogItemDto> Items
+    }
+    class MealLogItemDto {
+        + string FoodName
+        + decimal Grams
+        + int Calories
+        + MacroNutrientsDto Macros
+    }
+    class MacroNutrientsDto {
+        + decimal Protein
+        + decimal Carbs
+        + decimal Fats
+    }
+    class FoodDto {
+        + string Barcode
+        + string Name
+        + int CaloriesPer100g
+    }
+    class AiAnalysisResult {
+        + int EstimatedCalories
+        + string Description
+    }
+    class UserDto
+    class MeasurementDto
+}
+
+package "Application.Features" {
+    package "Diet" {
+        class AddMealItemCommand {
+            + Guid UserId
+            + DateTime Date
+            + Guid FoodProductId
+            + decimal Grams
+        }
+        class AddMealItemHandler {
+            - IMealLogRepository _mealLogRepository
+            - IFoodRepository _foodRepository
+            - MealLogDomainService _mealLogService
+            + Handle(AddMealItemCommand request, ...) Task<Unit>
+        }
+
+        class GetDailyDiaryQuery {
+            + Guid UserId
+            + DateTime Date
+        }
+        class GetDailyDiaryHandler {
+            - IMealLogRepository _mealLogRepository
+            + Handle(GetDailyDiaryQuery request, ...) Task<DiaryDto>
+        }
+    }
+
+    package "Profile" {
+        class CalculateTdeeCommand {
+            + Guid UserId
+            + decimal ActivityLevel
+        }
+        class CalculateTdeeHandler {
+            - IUserRepository _userRepository
+            - TdeeCalculationService _tdeeService
+            + Handle(CalculateTdeeCommand request, ...) Task<int>
+        }
+    }
+}
+
+' Relationships
+AddMealItemHandler ..> AddMealItemCommand : handles
+GetDailyDiaryHandler ..> GetDailyDiaryQuery : handles
+CalculateTdeeHandler ..> CalculateTdeeCommand : handles
+
+GetDailyDiaryHandler ..> DiaryDto : returns
+DiaryDto *-- MealLogItemDto
+MealLogItemDto *-- MacroNutrientsDto
+
+' External Service usage (logical)
+AddMealItemHandler --> "Domain.Interfaces" : uses IMealLogRepository
+AddMealItemHandler --> "Domain.Services" : uses MealLogDomainService
+CalculateTdeeHandler --> "Domain.Services" : uses TdeeCalculationService
+
+@enduml

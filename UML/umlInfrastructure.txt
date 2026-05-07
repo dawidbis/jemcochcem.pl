@@ -1,0 +1,101 @@
+@startuml
+
+interface IGenericRepository<T> {
+    + GetByIdAsync(Guid id) Task<T?>
+    + GetAllAsync() Task<IEnumerable<T>>
+    + AddAsync(T entity) Task
+    + Update(T entity) void
+    + Remove(T entity) void
+}
+
+interface IMealLogRepository
+interface IUserRepository
+interface IFoodRepository
+
+interface IClaudeAiService {
+    + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
+    + AskCoachAsync(string prompt) Task<string>
+}
+
+interface IOffApiClient {
+    + FetchProductByBarcode(string barcode) Task<FoodDto>
+}
+
+interface IRedisCache {
+    + GetAsync<T>(string key) Task<T>
+    + SetAsync<T>(string key, T value, TimeSpan ttl) Task
+}
+
+class GenericRepository<T> {
+    # AppDbContext _context
+    # DbSet<T> _dbSet
+    + GenericRepository(AppDbContext context)
+    + GetByIdAsync(Guid id) Task<T?>
+    + GetAllAsync() Task<IEnumerable<T>>
+    + AddAsync(T entity) Task
+    + Update(T entity) void
+    + Remove(T entity) void
+}
+
+class MealLogRepository {
+    + MealLogRepository(AppDbContext context)
+    + GetByDateAsync(Guid userId, DateTime date) Task<MealLog?>
+    + UpdateAsync(MealLog log) Task
+}
+
+class UserRepository {
+    + UserRepository(AppDbContext context)
+}
+
+class FoodRepository {
+    + FoodRepository(AppDbContext context)
+    + GetByBarcodeAsync(string barcode) Task<FoodProduct?>
+}
+
+class ClaudeAiService {
+    - HttpClient _httpClient
+    + ClaudeAiService(HttpClient httpClient)
+    + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
+    + AskCoachAsync(string prompt) Task<string>
+}
+
+class OpenFoodFactsClient {
+    - HttpClient _httpClient
+    + OpenFoodFactsClient(HttpClient httpClient)
+    + FetchProductByBarcode(string barcode) Task<FoodDto>
+}
+
+class RedisCacheService {
+    - IDatabase _db
+    + RedisCacheService(IConnectionMultiplexer redis)
+    + GetAsync<T>(string key) Task<T>
+    + SetAsync<T>(string key, T value, TimeSpan ttl) Task
+}
+
+class AppDbContext {
+    + DbSet<User> Users
+    + DbSet<MealLog> MealLogs
+    + DbSet<FoodProduct> FoodProducts
+    + AppDbContext(DbContextOptions<AppDbContext> options)
+    + SaveChangesAsync(CancellationToken ct) Task<int>
+}
+
+IGenericRepository <|.. GenericRepository
+GenericRepository <|-- MealLogRepository
+GenericRepository <|-- UserRepository
+GenericRepository <|-- FoodRepository
+
+IMealLogRepository <|.. MealLogRepository
+IUserRepository <|.. UserRepository
+IFoodRepository <|.. FoodRepository
+
+IClaudeAiService <|.. ClaudeAiService
+IOffApiClient <|.. OpenFoodFactsClient
+IRedisCache <|.. RedisCacheService
+
+GenericRepository o-- AppDbContext
+MealLogRepository o-- AppDbContext
+UserRepository o-- AppDbContext
+FoodRepository o-- AppDbContext
+
+@enduml
