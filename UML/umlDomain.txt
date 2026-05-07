@@ -1,0 +1,84 @@
+@startuml
+
+package "Entities" {
+    class User {
+        + Guid Id
+        + string Email
+        + decimal Weight
+        + decimal Height
+        + int Age
+        + string Gender
+    }
+
+    class MealLog {
+        + Guid Id
+        + Guid UserId
+        + DateTime Date
+        + int TotalCalories
+        + decimal TotalProtein
+        + decimal TotalCarbs
+        + decimal TotalFats
+    }
+
+    class MealLogItem {
+        + Guid Id
+        + Guid MealLogId
+        + Guid FoodProductId
+        + decimal Grams
+    }
+
+    class FoodProduct {
+        + Guid Id
+        + string Barcode
+        + string Name
+        + int CaloriesPer100g
+        + decimal ProteinPer100g
+        + decimal CarbsPer100g
+        + decimal FatsPer100g
+    }
+
+    class BodyMeasurement {
+        + Guid Id
+        + Guid UserId
+        + DateTime Date
+        + decimal Weight
+        + decimal BodyFatPercentage
+    }
+}
+
+package "ValueObjects" {
+    class MacroNutrients <<record>> {
+        + decimal Protein
+        + decimal Carbs
+        + decimal Fats
+    }
+}
+
+package "DomainServices" {
+    class NutritionCalculationService {
+        + CalculateItemCalories(decimal grams, int caloriesPer100g) int
+        + CalculateItemMacros(decimal grams, ...) MacroNutrients
+    }
+
+    class TdeeCalculationService {
+        + CalculateBMR(decimal weight, decimal height, int age, string gender) decimal
+        + CalculateTDEE(decimal weight, ...) int
+    }
+
+    class MealLogDomainService {
+        - NutritionCalculationService _nutritionService
+        + AddItemToLog(MealLog log, MealLogItem item) void
+        + RecalculateLogTotals(MealLog log) void
+    }
+}
+
+' Relationships
+User "1" *-- "0..*" BodyMeasurement
+User "1" *-- "0..*" MealLog
+MealLog "1" *-- "0..*" MealLogItem
+MealLogItem "0..*" o-- "1" FoodProduct
+
+MealLogDomainService --> NutritionCalculationService : uses
+NutritionCalculationService ..> MacroNutrients : creates
+
+@enduml
