@@ -1,3 +1,4 @@
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 using FitApp.Application;
 using FitApp.Infrastructure;
 using FitApp.Infrastructure.Data;
