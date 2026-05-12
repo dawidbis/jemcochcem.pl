@@ -1,8 +1,9 @@
 namespace FitApp.Domain.Services;
 
+using FitApp.Domain.Interfaces;
 using FitApp.Domain.ValueObjects;
 
-public class NutritionCalculationService 
+public class NutritionCalculationService : INutritionCalculationService
 {
     public int CalculateItemCalories(decimal grams, int caloriesPer100g) => 
         (int)(grams * caloriesPer100g / 100m);

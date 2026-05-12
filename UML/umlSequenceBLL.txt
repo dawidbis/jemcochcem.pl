@@ -1,0 +1,44 @@
+@startuml Sequence_BLL_AddMeal
+actor User
+participant "AddMealItemHandler" as Handler
+participant "IMealLogRepository" as Repo
+participant "IMealLogDomainService" as BLL
+participant "INutritionCalculationService" as Calc
+database "Database" as DB
+
+User -> Handler : Handle(AddMealItemCommand)
+activate Handler
+
+Handler -> Repo : GetByDateAsync(UserId, Date)
+activate Repo
+Repo -> DB : Query
+DB --> Repo : MealLog data
+Repo --> Handler : MealLog entity
+deactivate Repo
+
+Handler -> BLL : AddItemToLog(log, newItem)
+activate BLL
+
+BLL -> BLL : log.Items.Add(newItem)
+BLL -> BLL : RecalculateLogTotals(log)
+
+loop for each item in log.Items
+    BLL -> Calc : CalculateItemCalories(grams, kcalPer100g)
+    activate Calc
+    Calc --> BLL : result calories
+    deactivate Calc
+end
+
+BLL --> Handler : void
+deactivate BLL
+
+Handler -> Repo : UpdateAsync(log)
+activate Repo
+Repo -> DB : SaveChanges
+DB --> Repo : OK
+Repo --> Handler : Task
+deactivate Repo
+
+Handler --> User : Guid (MealLogItemId)
+deactivate Handler
+@enduml

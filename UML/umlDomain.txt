@@ -54,21 +54,33 @@ package "ValueObjects" {
     }
 }
 
+package "DomainInterfaces" {
+    interface INutritionCalculationService {
+        + CalculateItemCalories(grams: decimal, caloriesPer100g: int): int
+        + CalculateItemMacros(grams: decimal, proteinPer100g: decimal, carbs: decimal, fats: decimal): MacroNutrients
+    }
+
+    interface IMealLogDomainService {
+        + AddItemToLog(log: MealLog, item: MealLogItem): void
+        + RecalculateLogTotals(log: MealLog): void
+    }
+}
+
 package "DomainServices" {
-    class NutritionCalculationService {
-        + CalculateItemCalories(decimal grams, int caloriesPer100g) int
-        + CalculateItemMacros(decimal grams, ...) MacroNutrients
+    class NutritionCalculationService implements INutritionCalculationService {
+        + CalculateItemCalories(grams: decimal, caloriesPer100g: int): int
+        + CalculateItemMacros(grams: decimal, proteinPer100g: decimal, carbs: decimal, fats: decimal): MacroNutrients
     }
 
     class TdeeCalculationService {
-        + CalculateBMR(decimal weight, decimal height, int age, string gender) decimal
-        + CalculateTDEE(decimal weight, ...) int
+        + CalculateBMR(weight: decimal, height: decimal, age: int, gender: string): decimal
+        + CalculateTDEE(weight: decimal, activityLevel: decimal): int
     }
 
-    class MealLogDomainService {
-        - NutritionCalculationService _nutritionService
-        + AddItemToLog(MealLog log, MealLogItem item) void
-        + RecalculateLogTotals(MealLog log) void
+    class MealLogDomainService implements IMealLogDomainService {
+        - INutritionCalculationService _nutritionService
+        + AddItemToLog(log: MealLog, item: MealLogItem): void
+        + RecalculateLogTotals(log: MealLog): void
     }
 }
 
@@ -78,7 +90,7 @@ User "1" *-- "0..*" MealLog
 MealLog "1" *-- "0..*" MealLogItem
 MealLogItem "0..*" o-- "1" FoodProduct
 
-MealLogDomainService --> NutritionCalculationService : uses
+MealLogDomainService --> INutritionCalculationService : uses
 NutritionCalculationService ..> MacroNutrients : creates
 
 @enduml
