@@ -42,7 +42,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseCors("VitePolicy");
 
 using (var scope = app.Services.CreateScope())
