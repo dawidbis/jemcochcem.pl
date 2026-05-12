@@ -5,5 +5,5 @@ using System.Threading.Tasks;
 
 public interface IOffApiClient
 {
-    Task<FoodDto> FetchProductByBarcode(string barcode);
+    Task<FoodDto?> FetchProductByBarcode(string barcode);
 }

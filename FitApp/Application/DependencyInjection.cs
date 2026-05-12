@@ -2,6 +2,8 @@ namespace FitApp.Application;
 
 using Microsoft.Extensions.DependencyInjection;
 using FitApp.Domain.Services;
+using FitApp.Application.Interfaces;
+using FitApp.Infrastructure.ExternalServices;
 
 public static class DependencyInjection
 {
@@ -11,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<NutritionCalculationService>();
         services.AddScoped<MealLogDomainService>();
         services.AddScoped<TdeeCalculationService>();
+        services.AddHttpClient<IOffApiClient, OpenFoodFactsClient>();
         return services;
     }
 }

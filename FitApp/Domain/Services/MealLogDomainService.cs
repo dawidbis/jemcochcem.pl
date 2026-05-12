@@ -31,9 +31,13 @@ public class MealLogDomainService : IMealLogDomainService
            ArgumentNullException.ThrowIfNull(product);
 
            log.TotalCalories += _nutritionService.CalculateItemCalories(item.Grams, product.CaloriesPer100g);
-           log.TotalProtein += item.Grams * product.ProteinPer100g / 100m;
-           log.TotalCarbs += item.Grams * product.CarbsPer100g / 100m;
-           log.TotalFats += item.Grams * product.FatsPer100g / 100m;
+    
+           // UŻYWAMY NASZEJ METODY ZAMIAST LICZYĆ RĘCZNIE!
+           var macros = _nutritionService.CalculateItemMacros(item.Grams, product.ProteinPer100g, product.CarbsPer100g, product.FatsPer100g);
+    
+           log.TotalProtein += macros.Protein;
+           log.TotalCarbs += macros.Carbs;
+           log.TotalFats += macros.Fats;
        }
    }
 }

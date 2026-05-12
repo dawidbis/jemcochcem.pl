@@ -1,5 +1,6 @@
 using FitApp.Domain.Entities;
 using FitApp.Infrastructure.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FitApp.Infrastructure.Data.Repositories;
 
