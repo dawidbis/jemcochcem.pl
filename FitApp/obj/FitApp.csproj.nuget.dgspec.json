@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "F:\\jemcochcemprojekt\\FitApp\\FitApp.csproj": {}
+    "C:\\repo\\jemcochcem.pl\\FitApp\\FitApp.csproj": {}
   },
   "projects": {
-    "F:\\jemcochcemprojekt\\FitApp\\FitApp.csproj": {
+    "C:\\repo\\jemcochcem.pl\\FitApp\\FitApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\jemcochcemprojekt\\FitApp\\FitApp.csproj",
+        "projectUniqueName": "C:\\repo\\jemcochcem.pl\\FitApp\\FitApp.csproj",
         "projectName": "FitApp",
-        "projectPath": "F:\\jemcochcemprojekt\\FitApp\\FitApp.csproj",
-        "packagesPath": "C:\\Users\\Dzej\\.nuget\\packages\\",
-        "outputPath": "F:\\jemcochcemprojekt\\FitApp\\obj\\",
+        "projectPath": "C:\\repo\\jemcochcem.pl\\FitApp\\FitApp.csproj",
+        "packagesPath": "C:\\Users\\wrobel\\.nuget\\packages\\",
+        "outputPath": "C:\\repo\\jemcochcem.pl\\FitApp\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Dzej\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\wrobel\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -34,7 +39,13 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -58,9 +69,9 @@
               "target": "Package",
               "version": "[8.0.16, )"
             },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[8.0.26, )"
+              "version": "[8.0.11, )"
             },
             "StackExchange.Redis": {
               "target": "Package",
@@ -90,7 +101,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

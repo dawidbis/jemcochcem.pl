@@ -1,0 +1,11 @@
+**/.git
+**/bin
+**/obj
+**/node_modules
+**/.vscode
+**/.vs
+**/UML
+**/.agents
+**/.clinerules
+**/.continue
+FitApp.Client/

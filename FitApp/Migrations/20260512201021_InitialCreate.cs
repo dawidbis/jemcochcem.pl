@@ -15,13 +15,13 @@ namespace FitApp.Migrations
                 name: "FoodProducts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Barcode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CaloriesPer100g = table.Column<int>(type: "int", nullable: false),
-                    ProteinPer100g = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CarbsPer100g = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    FatsPer100g = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Barcode = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    CaloriesPer100g = table.Column<int>(type: "integer", nullable: false),
+                    ProteinPer100g = table.Column<decimal>(type: "numeric", nullable: false),
+                    CarbsPer100g = table.Column<decimal>(type: "numeric", nullable: false),
+                    FatsPer100g = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,13 +32,13 @@ namespace FitApp.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Weight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Age = table.Column<int>(type: "int", nullable: false),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    Weight = table.Column<decimal>(type: "numeric", nullable: false),
+                    Height = table.Column<decimal>(type: "numeric", nullable: false),
+                    Age = table.Column<int>(type: "integer", nullable: false),
+                    Gender = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,11 +49,11 @@ namespace FitApp.Migrations
                 name: "BodyMeasurements",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Weight = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    BodyFatPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Weight = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: false),
+                    BodyFatPercentage = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -70,13 +70,13 @@ namespace FitApp.Migrations
                 name: "MealLogs",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalCalories = table.Column<int>(type: "int", nullable: false),
-                    TotalProtein = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalCarbs = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalFats = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    TotalCalories = table.Column<int>(type: "integer", nullable: false),
+                    TotalProtein = table.Column<decimal>(type: "numeric", nullable: false),
+                    TotalCarbs = table.Column<decimal>(type: "numeric", nullable: false),
+                    TotalFats = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,10 +93,10 @@ namespace FitApp.Migrations
                 name: "MealLogItem",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MealLogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FoodProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Grams = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MealLogId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FoodProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Grams = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
