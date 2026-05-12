@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IMealLogRepository, MealLogRepository>();
         services.AddScoped<IFoodRepository, FoodRepository>();
+        services.AddScoped<IBodyMeasurementRepository, BodyMeasurementRepository>(); 
 
         // --- REJESTRACJA WARSTWY BLL (PUNKT 2) ---
         services.AddScoped<INutritionCalculationService, NutritionCalculationService>();
