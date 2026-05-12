@@ -45,7 +45,13 @@ public class SearchFoodsHandler : IRequestHandler<SearchFoodsQuery, IEnumerable<
             Id = f.Id, // <-- To pozwoli połączyć produkt z dziennikiem!
             Barcode = f.Barcode ?? string.Empty,
             Name = f.Name,
-            CaloriesPer100g = f.CaloriesPer100g
+            CaloriesPer100g = f.CaloriesPer100g,
+            Macros = new MacroNutrientsDto
+            {
+                Protein = f.ProteinPer100g,
+                Carbs = f.CarbsPer100g,
+                Fats = f.FatsPer100g
+            }
         });
     }
 }
@@ -72,13 +78,19 @@ public class GetFoodByIdHandler : IRequestHandler<GetFoodByIdQuery, FoodDto>
         var food = await _foodRepository.GetByIdAsync(request.Id);
 
         if (food == null) return null;
-
+         var macros = new MacroNutrientsDto
+        {
+            Protein = food.ProteinPer100g,
+            Carbs = food.CarbsPer100g,
+            Fats = food.FatsPer100g
+        };
         return new FoodDto
         {
             Id = food.Id,
             Barcode = food.Barcode ?? string.Empty,
             Name = food.Name,
-            CaloriesPer100g = food.CaloriesPer100g
+            CaloriesPer100g = food.CaloriesPer100g,
+            Macros = macros
         };
     }
 }

@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/diary': {
-        target: 'http://localhost:5128', // Adres z FitApp.http
+      '/api': { // Zmiana z '/diary' na '/api' (obejmuje wszystkie kontrolery)
+        target: 'http://localhost:5128',
         changeOrigin: true,
         secure: false,
       }
