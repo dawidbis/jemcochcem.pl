@@ -1,9 +1,9 @@
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 using FitApp.Application;
 using FitApp.Infrastructure;
 using FitApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
