@@ -98,13 +98,63 @@ FitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do k
 
 ## 🌐 REST API
 
+### 👤 Moduł: Users & Profile
+*Zarządzanie kontem, celami kalorycznymi i danymi biometrycznymi.*
+
 | Metoda | Endpoint | Opis |
 | :--- | :--- | :--- |
-| `GET` | `/api/v1/diary/{date}` | Pobranie kompletnego dziennika z danego dnia. |
-| `POST` | `/api/v1/diary/items` | Dodanie produktu do posiłku (ID, gramatura). |
-| `GET` | `/api/v1/foods/barcode/{code}` | Pobranie danych produktu (z cache Redis). |
-| `POST` | `/api/v1/profile/measurements` | Zapisanie nowej wagi lub obwodów ciała. |
-| `POST` | `/api/v1/ai/chat` | Przesłanie zapytania do AI Coacha. |
+| `POST` | `/api/Users/register` | Rejestracja nowego użytkownika w systemie. |
+| `POST` | `/api/Users/login` | Autoryzacja i pobranie podstawowych danych sesji. |
+| `GET` | `/api/Users/{id}` | Pobranie danych profilowych (wiek, wzrost, płeć). |
+| `PUT` | `/api/Users/{id}` | Aktualizacja danych profilu użytkownika. |
+| `POST` | `/api/Users/{id}/macros` | Obliczenie TDEE i ustawienie celów makroskładników. |
+
+---
+
+### 🍎 Moduł: Foods (Baza Produktów)
+*Zarządzanie produktami lokalnymi oraz integracja z zewnętrznymi bazami danych.*
+
+| Metoda | Endpoint | Opis |
+| :--- | :--- | :--- |
+| `GET` | `/api/Foods/search` | Wyszukiwanie produktów (lokalne + query string). |
+| `GET` | `/api/Foods/{id}` | Pobranie szczegółowych informacji o produkcie po ID. |
+| `POST` | `/api/Foods` | Dodanie nowego, autorskiego produktu do lokalnej bazy. |
+| `PUT` | `/api/Foods/{id}` | Edycja istniejącego produktu (korekta makroskładników). |
+| `GET` | `/api/Foods/external/{barcode}` | Pobranie danych z Open Food Facts. |
+
+---
+
+### 📅 Moduł: Diary (Dziennik Posiłków)
+*Operacje na dziennym spożyciu i logowanie posiłków.*
+
+| Metoda | Endpoint | Opis |
+| :--- | :--- | :--- |
+| `GET` | `/api/Diary/{userId}/{date}` | Pobranie wpisów i podsumowania makro z danego dnia. |
+| `POST` | `/api/Diary/items` | Dodanie produktu do wybranego posiłku (np. Śniadanie). |
+| `POST` | `/api/Diary/items/barcode` | Szybkie dodanie produktu do dziennika via skaner kodów. |
+| `PUT` | `/api/Diary/items/{id}` | Zmiana ilości (gramatury) dodanej pozycji. |
+| `DELETE` | `/api/Diary/items/{id}` | Usunięcie produktu z dziennika posiłków. |
+
+---
+
+### 📉 Moduł: Measurements (Postępy)
+*Monitorowanie zmian masy ciała i wymiarów.*
+
+| Metoda | Endpoint | Opis |
+| :--- | :--- | :--- |
+| `POST` | `/api/Measurements` | Zapisanie nowego pomiaru wagi/ciała. |
+| `GET` | `/api/Measurements/user/{userId}` | Pobranie pełnej historii pomiarów dla wykresów. |
+| `DELETE` | `/api/Measurements/{id}` | Usunięcie błędnego wpisu historycznego. |
+
+---
+
+### 🤖 Moduł: AI Support
+*Interakcja z modelem językowym Claude.*
+
+| Metoda | Endpoint | Opis |
+| :--- | :--- | :--- |
+| `POST` | `/api/AI/analyze-photo` | Estymacja wartości odżywczych na podstawie zdjęcia. |
+| `POST` | `/api/AI/chat` | Konsultacja z AI Coachem w kontekście diety. |
 
 ---
 
@@ -117,68 +167,55 @@ FitApp/
 ├── .gitignore
 │
 ├── src/
-│   ├── FitApp.Domain/                  # Warstwa serca (Reguły biznesowe)
+│   ├── FitApp.Domain/                  # Warstwa serca (Domain Driven Design)
 │   │   ├── Entities/                   # User, MealLog, MealLogItem, FoodProduct, BodyMeasurement
 │   │   ├── ValueObjects/               # MacroNutrients (B/W/T), CalorieGoal
-│   │   ├── Interfaces/                 # IUserRepository, IFoodRepository (abstrakcje)
-│   │   └── Exceptions/                 # DomainException
+│   │   ├── Interfaces/                 # Abstrakcje: IUserRepository, IFoodRepository, IBodyMeasurementRepository
+│   │   └── Exceptions/                 # DomainException (specyficzne błędy biznesowe)
 │   │
 │   ├── FitApp.Application/             # Warstwa Logiki (CQRS + MediatR)
-│   │   ├── Features/
-│   │   │   ├── Diet/                   # Commands/Queries: AddMealItem, UpdatePortion, GetDailyDiary
-│   │   │   ├── Profile/                # Commands/Queries: UpdateMeasurements, CalculateTdee
-│   │   │   ├── AI/                     # Commands: AnalyzeMealPhoto, AskAiCoach
-│   │   │   └── Auth/                   # Login, Register
-│   │   ├── DTOs/                       # Obiekty transferu danych (UserDto, DiaryDto, FoodDto)
-│   │   ├── Validators/                 # FluentValidation (reguły walidacji danych wejściowych)
-│   │   └── Interfaces/                 # IClaudeAiService, IOffApiClient, IRedisCache
+│   │   ├── Features/                   # Pionowe plastry (Vertical Slices) funkcjonalności
+│   │   │   ├── Diary/                  # Dziennik: AddMealItem, DeleteMealItem, GetDailyDiary
+│   │   │   ├── Foods/                  # Baza produktów: CreateFood, UpdateFood, SearchFoods,FetchExternal
+│   │   │   ├── Measurements/           # Postępy: AddMeasurement, DeleteMeasurement, GetHistory
+│   │   │   ├── Users/                  # Profil i Cele: UpdateProfile, CalculateMacros, GetUserProfile
+│   │   │   ├── AI/                     # Moduł AI: AnalyzeMealPhoto, AskAiCoach
+│   │   │   └── Auth/                   # Autoryzacja: Login, Register
+│   │   ├── DTOs/                       # Obiekty transferu danych (UserDto, DiaryDto, FoodDto, MeasurementDto)
+│   │   ├── Validators/                 # FluentValidation (reguły walidacji komend i zapytań)
+│   │   └── Interfaces/                 # Abstrakcje serwisów: IClaudeAiService, IOffApiClient, IRedisCache
 │   │
 │   ├── FitApp.Infrastructure/          # Warstwa Techniczna (Implementacje)
 │   │   ├── Data/
-│   │   │   ├── AppDbContext.cs         # Konfiguracja EF Core
+│   │   │   ├── AppDbContext.cs         # Konfiguracja EF Core i Fluent API
 │   │   │   ├── Migrations/             # Migracje bazy danych SQL Server
-│   │   │   └── Repositories/           # Implementacje dostępu do danych
+│   │   │   └── Repositories/           # Konkretne implementacje dostępu do danych
 │   │   ├── ExternalServices/
-│   │   │   ├── OpenFoodFactsClient.cs  # Integracja z zewnętrzną bazą produktów
-│   │   │   └── ClaudeAiService.cs      # Integracja z modelem językowym Anthropic
+│   │   │   ├── OpenFoodFactsClient.cs  # Klient API zewnętrznej bazy produktów
+│   │   │   └── ClaudeAiService.cs      # Integracja z Anthropic Claude API
 │   │   └── Cache/
-│   │       └── RedisCacheService.cs    # Buforowanie wyników wyszukiwania (TTL 24h)
+│   │       └── RedisCacheService.cs    # Buforowanie wyników (TTL 24h)
 │   │
-│   └── FitApp.API/                     # Warstwa Prezentacji (REST Endpointy)
-│       ├── Controllers/
-│       │   ├── AuthController.cs
-│       │   ├── DiaryController.cs
-│       │   ├── ProfileController.cs
-│       │   └── AIController.cs
-│       ├── Middleware/
-│       │   ├── ExceptionHandler.cs     # Globalna obsługa błędów
-│       │   └── JwtMiddleware.cs        # Walidacja tokenów bezpieczeństwa
-│       └── Program.cs                  # Rejestracja usług i middleware
+│   └── FitApp.API/                     # Warstwa Prezentacji (REST Endpoints)
+│       ├── Controllers/                # UsersController, FoodsController, DiaryController, MeasurementsController
+│       ├── Middleware/                 # ExceptionHandler (globalny), JwtMiddleware (auth)
+│       └── Program.cs                  # Konfiguracja kontenera DI i potoku HTTP
 │
 ├── tests/                              # Testy automatyczne
-│   ├── FitApp.UnitTests/               # Testy jednostkowe logiki biznesowej
-│   └── FitApp.IntegrationTests/        # Testy integracyjne API
+│   ├── FitApp.UnitTests/               # Testy jednostkowe logiki biznesowej i encji
+│   └── FitApp.IntegrationTests/        # Testy integracyjne endpointów API
 │
 └── FitApp.Client/                      # Frontend (React 18 + TS + Vite)
     ├── src/
     │   ├── api/                        # Konfiguracja Axios i interceptory JWT
-    │   ├── features/                   # Moduły funkcjonalne (Vertical Slices)
-    │   │   ├── auth/                   # Komponenty logowania i rejestracji
-    │   │   ├── diet/                   # Dziennik, wyszukiwarka, skaner kodów
-    │   │   ├── measurements/           # Wykresy wagi i formularze pomiarów
-    │   │   └── ai/                     # Upload zdjęć i okno czatu z AI
-    │   ├── components/                 # Współdzielone UI (Button, Input, Card - shadcn)
-    │   ├── hooks/                      # Customowe hooki (useAuth, useDebounce)
-    │   ├── types/                      # Wspólne interfejsy TypeScript
-    │   ├── lib/                        # Konfiguracja bibliotek (Tailwind, QueryClient)
-    │   ├── utils/                      # Formaty dat, obliczenia matematyczne
-    │   ├── App.tsx                     # Główny router i dostawcy stanu
-    │   └── main.tsx                    # Punkt wejścia aplikacji
-    ├── public/                         # Pliki statyczne
-    ├── .env                            # Konfiguracja środowiskowa (API URL)
-    ├── tailwind.config.js
-    └── vite.config.ts
-```
+    │   ├── features/                   # Moduły UI (auth, diet, measurements, ai)
+    │   ├── components/                 # Współdzielone UI (shadcn/ui)
+    │   ├── hooks/                      # Customowe hooki (useAuth, useMeasurements)
+    │   ├── types/                      # Wspólne interfejsy TypeScript (odpowiedniki DTO)
+    │   ├── lib/                        # Konfiguracja TanStack Query i Tailwind
+    │   ├── App.tsx                     # Główny router aplikacji
+    │   └── main.tsx                    # Punkt wejścia
+    └── .env                            # Zmienne środowiskowe (API_URL)
 -------------------------------------------------------------------------
 PLAN ITERACJI (Core Edition)
 -------------------------------------------------------------------------
