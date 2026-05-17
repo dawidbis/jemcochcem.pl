@@ -11,8 +11,8 @@
   },
   "imports": {
     "#components/*": "./src/components/*.tsx",
-    "#lib/*": "./src/lib/*.ts",
-    "#hooks/*": "./src/hooks/*.ts"
+    "#lib/*": "./lib/*.ts",
+    "#hooks/*": "./hooks/*.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
