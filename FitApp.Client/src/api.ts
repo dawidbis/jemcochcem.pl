@@ -1,4 +1,4 @@
-import type { User, DiarySummary, Food, ExternalFood } from './types';
+import type {  DiarySummary, Food, ExternalFood } from './types';
 
 export const api = {
   async loadDiary(date: string, userId: string): Promise<DiarySummary | null> {
