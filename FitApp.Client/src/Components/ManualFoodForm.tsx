@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { api } from '../api';
 
 export function ManualFoodForm({ onAdded }: { onAdded: () => void }) {
   const [form, setForm] = useState({ name: '', caloriesPer100g: 0, proteinPer100g: 0, carbsPer100g: 0, fatPer100g: 0 });
@@ -6,13 +7,13 @@ export function ManualFoodForm({ onAdded }: { onAdded: () => void }) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...form, barcode: '' }; // Pusty barkod dla ręcznych
-    const res = await fetch('/api/foods', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const payload = { ...form, barcode: '' }; 
+    const res = await api.saveFood(payload);
     
     if (res.ok) {
       setStatus('Zapisano pomyślnie!');
       setForm({ name: '', caloriesPer100g: 0, proteinPer100g: 0, carbsPer100g: 0, fatPer100g: 0 });
-      onAdded(); // Odśwież widoki wyżej
+      onAdded(); 
     } else setStatus('Błąd zapisu.');
   };
 

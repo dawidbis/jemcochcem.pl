@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import type  {User}  from '../types';
+import type { User } from '../types';
+import { api } from '../api';
 
 export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -8,11 +9,10 @@ export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const endpoint = isRegistering ? '/api/users/register' : '/api/users/login';
     const payload = isRegistering ? formData : { email: formData.email, password: formData.password };
 
     try {
-      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = isRegistering ? await api.register(payload) : await api.login(payload);
       if (res.ok) {
         if (isRegistering) { setMsg({ text: 'Utworzono.', isError: false }); setIsRegistering(false); } 
         else { onLogin(await res.json()); }

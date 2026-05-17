@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { User, DiarySummary, Food, ExternalFood } from '../types';
-import { ManualFoodForm } from './ManualFoodForm';
+import { ManualFoodForm } from '../components/ManualFoodForm';
+import { api } from '../api';
 
 export function FoodDiary({ user, onLogout }: { user: User, onLogout: () => void }) {
   const [diary, setDiary] = useState<DiarySummary | null>(null);
@@ -12,8 +13,8 @@ export function FoodDiary({ user, onLogout }: { user: User, onLogout: () => void
   const TODAY = new Date().toISOString().split('T')[0];
 
   const loadDiary = async () => {
-    const res = await fetch(`/api/diary/${TODAY}?userId=${user.userId}`);
-    if (res.ok) setDiary(await res.json());
+    const data = await api.loadDiary(TODAY, user.userId);
+    if (data) setDiary(data);
   };
 
   useEffect(() => { loadDiary(); }, []);
@@ -21,31 +22,31 @@ export function FoodDiary({ user, onLogout }: { user: User, onLogout: () => void
   useEffect(() => {
     if (!search.trim()) { setResults([]); return; }
     const timer = setTimeout(async () => {
-      const res = await fetch(`/api/foods/search?query=${search}`);
-      if (res.ok) setResults(await res.json());
+      const data = await api.searchFoods(search);
+      setResults(data);
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   const fetchExternal = async () => {
-    const res = await fetch(`/api/foods/external/${barcode}`);
-    if (res.ok) setExternalFood(await res.json());
+    const data = await api.fetchExternalFood(barcode);
+    if (data) setExternalFood(data);
   };
 
   const saveExternal = async () => {
     if (!externalFood) return;
     const payload = { name: externalFood.name, barcode, caloriesPer100g: externalFood.caloriesPer100g, proteinPer100g: externalFood.macros?.protein || 0, carbsPer100g: externalFood.macros?.carbs || 0, fatPer100g: externalFood.macros?.fats || 0 };
-    await fetch('/api/foods', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    await api.saveFood(payload);
     setExternalFood(null); setBarcode('');
   };
 
   const addMeal = async (foodId: string) => {
-    await fetch('/api/diary/items', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.userId, date: new Date().toISOString(), foodProductId: foodId, grams }) });
+    await api.addMealItem({ userId: user.userId, date: new Date().toISOString(), foodProductId: foodId, grams });
     loadDiary(); setResults([]); setSearch('');
   };
 
   const deleteMeal = async (itemId: string) => {
-    await fetch(`/api/diary/${TODAY}/items/${itemId}?userId=${user.userId}`, { method: 'DELETE' });
+    await api.deleteMealItem(TODAY, itemId, user.userId);
     loadDiary();
   };
 
