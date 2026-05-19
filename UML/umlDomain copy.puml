@@ -1,0 +1,96 @@
+@startuml
+
+package "Entities" {
+    class User {
+        + Guid Id
+        + string Email
+        + decimal Weight
+        + decimal Height
+        + int Age
+        + string Gender
+    }
+
+    class MealLog {
+        + Guid Id
+        + Guid UserId
+        + DateTime Date
+        + int TotalCalories
+        + decimal TotalProtein
+        + decimal TotalCarbs
+        + decimal TotalFats
+    }
+
+    class MealLogItem {
+        + Guid Id
+        + Guid MealLogId
+        + Guid FoodProductId
+        + decimal Grams
+    }
+
+    class FoodProduct {
+        + Guid Id
+        + string Barcode
+        + string Name
+        + int CaloriesPer100g
+        + decimal ProteinPer100g
+        + decimal CarbsPer100g
+        + decimal FatsPer100g
+    }
+
+    class BodyMeasurement {
+        + Guid Id
+        + Guid UserId
+        + DateTime Date
+        + decimal Weight
+        + decimal BodyFatPercentage
+    }
+}
+
+package "ValueObjects" {
+    class MacroNutrients <<record>> {
+        + decimal Protein
+        + decimal Carbs
+        + decimal Fats
+    }
+}
+
+package "DomainInterfaces" {
+    interface INutritionCalculationService {
+        + CalculateItemCalories(grams: decimal, caloriesPer100g: int): int
+        + CalculateItemMacros(grams: decimal, proteinPer100g: decimal, carbs: decimal, fats: decimal): MacroNutrients
+    }
+
+    interface IMealLogDomainService {
+        + AddItemToLog(log: MealLog, item: MealLogItem): void
+        + RecalculateLogTotals(log: MealLog): void
+    }
+}
+
+package "DomainServices" {
+    class NutritionCalculationService implements INutritionCalculationService {
+        + CalculateItemCalories(grams: decimal, caloriesPer100g: int): int
+        + CalculateItemMacros(grams: decimal, proteinPer100g: decimal, carbs: decimal, fats: decimal): MacroNutrients
+    }
+
+    class TdeeCalculationService {
+        + CalculateBMR(weight: decimal, height: decimal, age: int, gender: string): decimal
+        + CalculateTDEE(weight: decimal, activityLevel: decimal): int
+    }
+
+    class MealLogDomainService implements IMealLogDomainService {
+        - INutritionCalculationService _nutritionService
+        + AddItemToLog(log: MealLog, item: MealLogItem): void
+        + RecalculateLogTotals(log: MealLog): void
+    }
+}
+
+' Relationships
+User "1" *-- "0..*" BodyMeasurement
+User "1" *-- "0..*" MealLog
+MealLog "1" *-- "0..*" MealLogItem
+MealLogItem "0..*" o-- "1" FoodProduct
+
+MealLogDomainService --> INutritionCalculationService : uses
+NutritionCalculationService ..> MacroNutrients : creates
+
+@enduml
