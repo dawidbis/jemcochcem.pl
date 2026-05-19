@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";
 import { LogOut, Utensils, Scale, User, CalendarDays  } from "lucide-react";
 
 type Page = 'diary' |'calendar'| 'measurements' | 'profile';
+=======
+import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";//nie wiem o o co chodzi nie zmieniałem tego jak co a jest błąd tutaj u mnie - mf 
+import { LogOut, Utensils, Scale, User,Sparkles } from "lucide-react";
+
+type Page = 'diary' | 'measurements' | 'profile'| 'ai-matcher';
+>>>>>>> 31c9c58 (Zapisuje front przed pullem AI)
 
 interface Props {
   children: React.ReactNode;
@@ -33,6 +40,7 @@ export function AppLayout({ children, onLogout, activePage, onNavigate }: Props)
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
+<<<<<<< HEAD
                     onClick={() => onNavigate('calendar')}
                     className={`w-full transition-colors rounded-lg py-6 font-medium ${
                       activePage === 'calendar'
@@ -44,6 +52,19 @@ export function AppLayout({ children, onLogout, activePage, onNavigate }: Props)
                     <span className="text-base">Kalendarz</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+=======
+                  onClick={() => onNavigate('ai-matcher')}
+                  className={`w-full transition-colors rounded-lg py-6 font-medium ${
+                    activePage === 'ai-matcher'
+                      ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <Sparkles className="mr-2 h-5 w-5 text-indigo-500" />
+                  <span className="text-base font-semibold">Dobór Posiłku AI</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+>>>>>>> 31c9c58 (Zapisuje front przed pullem AI)
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => onNavigate('measurements')}

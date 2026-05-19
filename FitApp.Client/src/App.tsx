@@ -2,13 +2,14 @@ import { useState } from 'react';
 import type { User } from './types';
 import { LoginForm } from './Components/LoginForm';
 import { FoodDiary } from './Components/FoodDiary';
-import { DietCalendar } from './Components/Dietcalendar';
+import { DietCalendar } from './components/DietCalendar';
 import { BodyMeasurements } from './Components/BodyMeasurements';
 import { UserProfile } from './Components/UserProfile';
+import { AiMealMatcher } from './Components/AiMealMatcher';
 import './App.css';
-import { AppLayout } from '#components/AppLayout';
+import { AppLayout } from './Components/AppLayout';
 
-type Page = 'diary' | 'calendar' | 'measurements' | 'profile';
+type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -27,6 +28,7 @@ export default function App() {
       {page === 'calendar' && <DietCalendar user={user} />}
       {page === 'measurements' && <BodyMeasurements user={user} />}
       {page === 'profile' && <UserProfile userId={user.userId} />}
+      {page === 'ai-matcher' && <AiMealMatcher />}
     </AppLayout>
   );
 }
