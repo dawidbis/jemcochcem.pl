@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { User } from './types';
 import { LoginForm } from './Components/LoginForm';
 import { FoodDiary } from './Components/FoodDiary';
-import { DietCalendar } from './components/DietCalendar';
+import { DietCalendar } from './Components/Dietcalendar';
 import { BodyMeasurements } from './Components/BodyMeasurements';
 import { UserProfile } from './Components/UserProfile';
 import { AiMealMatcher } from './Components/AiMealMatcher';
