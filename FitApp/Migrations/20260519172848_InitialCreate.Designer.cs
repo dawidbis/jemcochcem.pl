@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FitApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260512201021_InitialCreate")]
+    [Migration("20260519172848_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -31,14 +31,25 @@ namespace FitApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("BodyFatPercentage")
+                    b.Property<decimal?>("BodyFatPercentage")
                         .HasColumnType("numeric");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal?>("Hips")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal?>("Waist")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
 
                     b.Property<decimal>("Weight")
                         .HasPrecision(5, 2)
@@ -89,7 +100,7 @@ namespace FitApp.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("TotalCalories")
                         .HasColumnType("integer");
@@ -160,6 +171,10 @@ namespace FitApp.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal?>("TargetWeight")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
 
                     b.Property<decimal>("Weight")
                         .HasColumnType("numeric");

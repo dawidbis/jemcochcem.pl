@@ -38,7 +38,8 @@ namespace FitApp.Migrations
                     Weight = table.Column<decimal>(type: "numeric", nullable: false),
                     Height = table.Column<decimal>(type: "numeric", nullable: false),
                     Age = table.Column<int>(type: "integer", nullable: false),
-                    Gender = table.Column<string>(type: "text", nullable: false)
+                    Gender = table.Column<string>(type: "text", nullable: false),
+                    TargetWeight = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -51,9 +52,12 @@ namespace FitApp.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Weight = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: false),
-                    BodyFatPercentage = table.Column<decimal>(type: "numeric", nullable: false)
+                    BodyFatPercentage = table.Column<decimal>(type: "numeric", nullable: true),
+                    Waist = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: true),
+                    Hips = table.Column<decimal>(type: "numeric(5,2)", precision: 5, scale: 2, nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -72,7 +76,7 @@ namespace FitApp.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     TotalCalories = table.Column<int>(type: "integer", nullable: false),
                     TotalProtein = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalCarbs = table.Column<decimal>(type: "numeric", nullable: false),
