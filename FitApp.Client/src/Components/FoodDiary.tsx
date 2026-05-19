@@ -74,7 +74,7 @@ export function FoodDiary({ user }: { user: User }) {
         
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-            <h3 className="text-lg font-semibold text-slate-700">Skaner (OFF)</h3>
+            <h3 className="text-lg font-semibold text-slate-700">Skaner Open Food Facts</h3>
           </div>
           <div className="p-4">
             <div className="flex gap-2">
