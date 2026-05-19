@@ -17,7 +17,13 @@ package "Interfaces (DAL)" {
         + GetLatestAsync(Guid userId) Task<BodyMeasurement?>
     }
 
-    interface IClaudeAiService {
+    ' --- NOWY INTERFEJS REPOZYTORIUM AI ---
+    interface IMealPlanRepository {
+        + GetItemByIdAsync(Guid id) Task<MealPlanItem?>
+    }
+
+    ' --- ZMIENIONE NA IAiService ---
+    interface IAiService {
         + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
         + AskCoachAsync(string prompt) Task<string>
     }
@@ -48,6 +54,9 @@ package "Repositories (Infrastructure)" {
         + MealLogRepository(AppDbContext context)
         + GetByDateAsync(Guid userId, DateTime date) Task<MealLog?>
         + UpdateAsync(MealLog log) Task
+        ' --- DODANE DZISIAJ METODY ---
+        + AddMealLogItemAsync(MealLogItem item) Task
+        + SaveChangesAsync() Task
     }
 
     class UserRepository {
@@ -64,12 +73,20 @@ package "Repositories (Infrastructure)" {
         + GetUserHistoryAsync(Guid userId) Task<IEnumerable<BodyMeasurement>>
         + GetLatestAsync(Guid userId) Task<BodyMeasurement?>
     }
+
+    ' --- NOWE REPOZYTORIUM AI ---
+    class MealPlanRepository {
+        + MealPlanRepository(AppDbContext context)
+        + GetItemByIdAsync(Guid id) Task<MealPlanItem?>
+    }
 }
 
 package "External Services" {
-    class ClaudeAiService {
+    ' --- ZMIENIONE NA GeminiAiService ---
+    class GeminiAiService {
         - HttpClient _httpClient
         + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
+        + AskCoachAsync(string prompt) Task<string>
     }
 
     class OpenFoodFactsClient {
@@ -88,6 +105,9 @@ class AppDbContext {
     + DbSet<MealLog> MealLogs
     + DbSet<FoodProduct> FoodProducts
     + DbSet<BodyMeasurement> BodyMeasurements
+    ' --- NOWE TABELE AI ---
+    + DbSet<MealPlan> MealPlans
+    + DbSet<MealPlanItem> MealPlanItems
     + SaveChangesAsync(CancellationToken ct) Task<int>
 }
 
@@ -97,13 +117,18 @@ GenericRepository <|-- MealLogRepository
 GenericRepository <|-- UserRepository
 GenericRepository <|-- FoodRepository
 GenericRepository <|-- BodyMeasurementRepository
+' --- NOWA RELACJA ---
+GenericRepository <|-- MealPlanRepository
 
 IMealLogRepository <|.. MealLogRepository
 IUserRepository <|.. UserRepository
 IFoodRepository <|.. FoodRepository
 IBodyMeasurementRepository <|.. BodyMeasurementRepository
+' --- NOWA RELACJA ---
+IMealPlanRepository <|.. MealPlanRepository
 
-IClaudeAiService <|.. ClaudeAiService
+' --- ZMIENIONA RELACJA ---
+IAiService <|.. GeminiAiService
 IOffApiClient <|.. OpenFoodFactsClient
 IRedisCache <|.. RedisCacheService
 

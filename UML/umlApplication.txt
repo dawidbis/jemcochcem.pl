@@ -1,7 +1,8 @@
 @startuml
 
 package "Application.Interfaces" {
-    interface IClaudeAiService {
+    ' --- ZMIENIONE NA IAiService ---
+    interface IAiService {
         + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
         + AskCoachAsync(string prompt) Task<string>
     }
@@ -44,6 +45,17 @@ package "Application.DTOs" {
     }
     class UserDto
     class MeasurementDto
+
+    ' --- NOWE DTO AI ---
+    class AiMealPlanItemDto {
+        + string MealType
+        + string ProductName
+        + int Grams
+        + int Calories
+        + decimal Proteins
+        + decimal Carbs
+        + decimal Fats
+    }
 }
 
 package "Application.Features" {
@@ -82,12 +94,43 @@ package "Application.Features" {
             + Handle(CalculateTdeeCommand request, ...) Task<int>
         }
     }
+
+    ' --- NOWE FEATURES AI ---
+    package "AI & MealPlans" {
+        class GenerateMealPlanCommand {
+            + Guid UserId
+            + string Prompt
+        }
+        class GenerateMealPlanCommandHandler {
+            - IAiService _aiService
+            - IMealPlanRepository _repository
+            + Handle(GenerateMealPlanCommand request, ...) Task<Guid>
+        }
+
+        class AddAiMealToDiaryCommand {
+            + Guid UserId
+            + Guid MealPlanItemId
+            + DateTime Date
+        }
+        class AddAiMealToDiaryCommandHandler {
+            - IMealPlanRepository _mealPlanRepo
+            - IFoodRepository _foodRepo
+            - IMealLogRepository _mealLogRepo
+            + Handle(AddAiMealToDiaryCommand request, ...) Task<Guid>
+        }
+    }
 }
 
 ' Relationships
 AddMealItemHandler ..> AddMealItemCommand : handles
 GetDailyDiaryHandler ..> GetDailyDiaryQuery : handles
 CalculateTdeeHandler ..> CalculateTdeeCommand : handles
+
+' --- RELACJE NOWYCH HANDLERÓW ---
+GenerateMealPlanCommandHandler ..> GenerateMealPlanCommand : handles
+AddAiMealToDiaryCommandHandler ..> AddAiMealToDiaryCommand : handles
+GenerateMealPlanCommandHandler --> IAiService : uses
+GenerateMealPlanCommandHandler ..> AiMealPlanItemDto : parses
 
 GetDailyDiaryHandler ..> DiaryDto : returns
 DiaryDto *-- MealLogItemDto
@@ -97,5 +140,9 @@ MealLogItemDto *-- MacroNutrientsDto
 AddMealItemHandler --> "Domain.Interfaces" : uses IMealLogRepository
 AddMealItemHandler --> "Domain.Services" : uses MealLogDomainService
 CalculateTdeeHandler --> "Domain.Services" : uses TdeeCalculationService
+
+' --- ZALEŻNOŚCI AI OD REPOZYTORIÓW ---
+GenerateMealPlanCommandHandler --> "Domain.Interfaces" : uses IMealPlanRepository
+AddAiMealToDiaryCommandHandler --> "Domain.Interfaces" : uses IMealPlanRepository, IFoodRepository, IMealLogRepository
 
 @enduml
