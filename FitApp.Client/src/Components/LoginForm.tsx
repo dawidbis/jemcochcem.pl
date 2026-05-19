@@ -3,11 +3,10 @@ import type { User } from '../types';
 import { api } from '../api';
 import { Button } from "#components/ui/button";
 import { Input } from "#components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#components/ui/select";
 
 export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '', weight: 75, height: 180, age: 30, gender: 'Male' });
+  const [formData, setFormData] = useState({ email: '', password: '', weight: 75, height: 180, age: 30, gender: 'Male', multiplier: 1.55 });
   const [msg, setMsg] = useState({ text: '', isError: false });
 
   const submit = async (e: React.FormEvent) => {
@@ -39,16 +38,32 @@ export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
             
             {isRegistering && (
               <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                <Input className="bg-slate-50" type="number" placeholder="Waga (kg)" onChange={e => setFormData({...formData, weight: Number(e.target.value)})} />
-                <Input className="bg-slate-50" type="number" placeholder="Wzrost (cm)" onChange={e => setFormData({...formData, height: Number(e.target.value)})} />
-                <Input className="bg-slate-50" type="number" placeholder="Wiek" onChange={e => setFormData({...formData, age: Number(e.target.value)})} />
-                <Select onValueChange={val => setFormData({...formData, gender: val})} defaultValue={formData.gender}>
-                  <SelectTrigger className="bg-slate-50"><SelectValue placeholder="Płeć" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Male">Mężczyzna</SelectItem>
-                    <SelectItem value="Female">Kobieta</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input className="bg-slate-50 h-10" type="number" placeholder="Waga (kg)" onChange={e => setFormData({...formData, weight: Number(e.target.value)})} />
+                <Input className="bg-slate-50 h-10" type="number" placeholder="Wzrost (cm)" onChange={e => setFormData({...formData, height: Number(e.target.value)})} />
+                <Input className="bg-slate-50 h-10" type="number" placeholder="Wiek" onChange={e => setFormData({...formData, age: Number(e.target.value)})} />
+                
+                <select 
+                  className="bg-slate-50 border border-slate-200 rounded-md px-3 h-10 outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
+                  value={formData.gender}
+                  onChange={e => setFormData({...formData, gender: e.target.value})}
+                >
+                  <option value="Male">Mężczyzna</option>
+                  <option value="Female">Kobieta</option>
+                </select>
+
+                <div className="col-span-2">
+                  <select 
+                    className="bg-slate-50 border border-slate-200 rounded-md px-3 h-10 outline-none focus:ring-2 focus:ring-blue-500 w-full text-sm"
+                    value={formData.multiplier}
+                    onChange={e => setFormData({...formData, multiplier: Number(e.target.value)})}
+                  >
+                    <option value={1.2}>Brak ćwiczeń (1.2)</option>
+                    <option value={1.375}>Lekka (1.375)</option>
+                    <option value={1.55}>Średnia (1.55)</option>
+                    <option value={1.725}>Wysoka (1.725)</option>
+                    <option value={1.9}>Bardzo wysoka (1.9)</option>
+                  </select>
+                </div>
               </div>
             )}
             
