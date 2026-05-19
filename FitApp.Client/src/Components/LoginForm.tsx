@@ -3,7 +3,6 @@ import type { User } from '../types';
 import { api } from '../api';
 import { Button } from "#components/ui/button";
 import { Input } from "#components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "#components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#components/ui/select";
 
 export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
@@ -25,17 +24,19 @@ export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0 rounded-2xl overflow-hidden">
-        <CardHeader className="bg-white pb-8 pt-10 text-center">
-          <CardTitle className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+    <div className="flex items-center justify-center min-h-screen bg-slate-100 p-4">
+      <div className="w-full max-w-md bg-white shadow-xl border border-slate-200 rounded-2xl overflow-hidden flex flex-col">
+        <div className="pb-6 pt-10 px-8 text-center">
+          <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
             {isRegistering ? 'Rejestracja' : 'Logowanie'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="bg-white px-8 pb-6">
+          </h2>
+        </div>
+        
+        <div className="px-8 pb-8">
           <form onSubmit={submit} className="flex flex-col gap-5">
             <Input className="bg-slate-50 py-6" type="email" placeholder="Email" onChange={e => setFormData({...formData, email: e.target.value})} required />
             <Input className="bg-slate-50 py-6" type="password" placeholder="Hasło" onChange={e => setFormData({...formData, password: e.target.value})} required />
+            
             {isRegistering && (
               <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
                 <Input className="bg-slate-50" type="number" placeholder="Waga (kg)" onChange={e => setFormData({...formData, weight: Number(e.target.value)})} />
@@ -50,12 +51,14 @@ export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
                 </Select>
               </div>
             )}
-            <Button type="submit" size="lg" className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-base font-semibold shadow-md">
+            
+            <Button type="submit" size="lg" className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md">
               {isRegistering ? 'Zarejestruj się' : 'Zaloguj się'}
             </Button>
           </form>
-        </CardContent>
-        <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex flex-col gap-3">
+        </div>
+        
+        <div className="bg-slate-50 border-t border-slate-100 p-6 flex flex-col gap-3">
           <Button variant="ghost" className="w-full text-slate-500 hover:text-slate-800" onClick={() => setIsRegistering(!isRegistering)}>
             {isRegistering ? 'Masz już konto? Zaloguj' : 'Brak konta? Zarejestruj'}
           </Button>
@@ -64,8 +67,8 @@ export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
               {msg.text}
             </p>
           )}
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

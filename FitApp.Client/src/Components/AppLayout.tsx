@@ -1,34 +1,47 @@
-import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";
-import { LogOut, Utensils } from "lucide-react";
+import { LogOut, Utensils} from "lucide-react";
 
-export function AppLayout({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) {
+interface AppLayoutProps {
+  children: React.ReactNode;
+  onLogout: () => void;
+  currentView: 'diary' | 'profile';
+  setView: (view: 'diary' | 'profile') => void;
+}
+
+export function AppLayout({ children, onLogout, currentView, setView }: AppLayoutProps) {
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-slate-50 font-sans text-slate-900">
-        <Sidebar className="border-r border-slate-200 bg-white shadow-sm">
-          <SidebarContent className="py-6">
-            <SidebarGroup>
-              <SidebarMenu className="space-y-2 px-4">
-                <SidebarMenuItem>
-                  <SidebarMenuButton className="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors rounded-lg py-6 font-medium">
-                    <Utensils className="mr-2 h-5 w-5" />
-                    <span className="text-base">Dziennik</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton className="w-full text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors rounded-lg py-6 mt-4 font-medium" onClick={onLogout}>
-                    <LogOut className="mr-2 h-5 w-5" />
-                    <span className="text-base">Wyloguj</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroup>
-          </SidebarContent>
-        </Sidebar>
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen w-full bg-slate-50 font-sans text-slate-900 flex flex-col">
+      <header className="bg-white border-b border-slate-200 shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-10 w-full">
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-2 text-blue-600">
+            <Utensils className="h-6 w-6" />
+            <span className="text-xl font-bold tracking-tight">FitApp</span>
+          </div>
+          
+          <nav className="flex gap-1">
+            <button 
+              onClick={() => setView('diary')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${currentView === 'diary' ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              Dziennik
+            </button>
+            <button 
+              onClick={() => setView('profile')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${currentView === 'profile' ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              Mój Profil
+            </button>
+          </nav>
+        </div>
+
+        <button onClick={onLogout} className="flex items-center gap-2 text-slate-400 hover:text-red-600 transition-colors font-medium">
+          <LogOut className="h-5 w-5" />
+          <span>Wyloguj</span>
+        </button>
+      </header>
+      
+      <main className="flex-1 p-4 md:p-6 lg:p-8 w-full mx-auto">
+        {children}
+      </main>
+    </div>
   );
 }

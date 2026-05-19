@@ -27,5 +27,16 @@ export const api = {
   },
   async register(payload: any) {
     return fetch('/api/users/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  },
+  async getUserProfile(userId: string) {
+    const res = await fetch(`/api/users/${userId}`);
+    return res.ok ? res.json() : null;
+  },
+  async updateUserProfile(userId: string, payload: any) {
+    return fetch(`/api/users/${userId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  },
+  async calculateMacros(userId: string, multiplier: number) {
+    const res = await fetch(`/api/users/${userId}/macros`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(multiplier) });
+    return res.ok ? res.json() : null;
   }
 };

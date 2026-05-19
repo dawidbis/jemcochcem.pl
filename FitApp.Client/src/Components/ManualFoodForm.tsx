@@ -50,7 +50,7 @@ export function ManualFoodForm({ onAdded }: { onAdded: () => void }) {
             <Input type="number" step="0.1" className="bg-rose-50/50 focus-visible:ring-rose-500" placeholder="Tłuszcz" value={form.fatPer100g || ''} onChange={e => setForm({...form, fatPer100g: Number(e.target.value)})} required />
           </div>
           
-          <Button type="submit" className="col-span-2 sm:col-span-4 mt-2 bg-slate-800 hover:bg-slate-700">Dodaj do bazy</Button>
+          <Button type="submit" className="col-span-2 sm:col-span-4 mt-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">Dodaj do bazy</Button>
         </form>
         {status && <p className={`text-sm mt-4 font-medium px-3 py-2 rounded-lg text-center ${status.includes('Błąd') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{status}</p>}
       </CardContent>
