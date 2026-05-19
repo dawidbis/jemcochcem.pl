@@ -1,0 +1,19 @@
+@startuml
+actor "Użytkownik" as U
+participant "React (Frontend)" as F
+participant "AiMealController (C#)" as C
+participant "Google Gemini API" as G
+
+U -> F: Wpisuje makro i klika "Generuj"
+F -> C: GET /api/AiMeal/generate-ai?protein=...
+activate C
+C -> C: Odczytuje klucz z .env
+C -> G: POST /generateContent (JSON prompt)
+activate G
+G -->> C: Zwraca wygenerowany posiłek (JSON text)
+deactivate G
+C -> C: Deserializuje i czyści formatowanie
+C -->> F: Zwraca HTTP 200 OK (Obiekt Posiłku)
+deactivate C
+F -->> U: Wyświetla wyliczone gramatury w panelu AI
+@enduml
