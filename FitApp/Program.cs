@@ -12,7 +12,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddScoped<FitApp.Domain.Services.IAiMealService, FitApp.Domain.Services.AiMealService>();
 builder.Services.AddCors(options => {
     options.AddPolicy("VitePolicy", policy => {
         if (builder.Environment.IsDevelopment())
