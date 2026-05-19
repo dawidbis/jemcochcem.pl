@@ -26,9 +26,10 @@ namespace FitApp.API.Controllers
         }
 
         [HttpPost("{id}/macros")]
-        public async Task<IActionResult> GetMacros([FromRoute] Guid id, [FromBody] decimal activityMultiplier)
+        public async Task<IActionResult> GetMacros([FromRoute] Guid id)
         {
-            var result = await _mediator.Send(new CalculateMacrosCommand(id, activityMultiplier));
+            // multiplier pobierany wewnątrz handlera bezpośrednio z bazy
+            var result = await _mediator.Send(new CalculateMacrosCommand(id));
             return Ok(result);
         }
 
@@ -61,7 +62,8 @@ namespace FitApp.API.Controllers
                 user.Height,
                 user.Age,
                 user.Gender,
-                user.TargetWeight
+                user.TargetWeight,
+                user.ActivityMultiplier
             });
         }
 
@@ -75,6 +77,7 @@ namespace FitApp.API.Controllers
             user.Height = request.Height;
             user.Age = request.Age;
             user.Gender = request.Gender;
+            user.ActivityMultiplier = request.ActivityMultiplier;
 
             await _userRepository.UpdateAsync(user);
             return NoContent();
@@ -87,7 +90,7 @@ namespace FitApp.API.Controllers
             return ok ? NoContent() : NotFound();
         }
 
-        public record UpdateUserProfileRequest(decimal Weight, decimal Height, int Age, string Gender);
+        public record UpdateUserProfileRequest(decimal Weight, decimal Height, int Age, string Gender, decimal ActivityMultiplier);
         public record SetTargetWeightRequest(decimal? TargetWeight);
     }
 
