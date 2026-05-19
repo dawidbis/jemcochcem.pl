@@ -52,6 +52,6 @@ app.UseCors("VitePolicy");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    try { db.Database.Migrate(); } catch (Exception ex) { Console.WriteLine($"Migration warning: {ex.Message}"); }
+    db.Database.Migrate();
 }
 app.Run();
