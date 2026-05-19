@@ -1,3 +1,4 @@
+using FitApp.Application.Features.Diary.AddAiMealToDiary;
 using FitApp.Application.Features.Diet;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -76,6 +77,22 @@ namespace FitApp.API.Controllers
             // Handler zajmie się pobraniem z sieci, zapisaniem do bazy i dodaniem do dziennika
             await _mediator.Send(command);
             return Ok(new { Message = "Produkt pobrany z bazy zewnętrznej i dodany do dziennika!" });
+        }
+        [HttpPost("items/from-ai-plan")]
+        public async Task<IActionResult> AddAiMealToDiary([FromBody] AddAiMealToDiaryRequest request)
+        {
+            // Używamy UserId bezpośrednio z requestu
+            var command = new AddAiMealToDiaryCommand(request.UserId, request.MealPlanItemId, request.Date);
+            var newMealLogItemId = await _mediator.Send(command);
+
+            return Ok(new { MealLogItemId = newMealLogItemId });
+        }
+
+        public class AddAiMealToDiaryRequest
+        {
+            public Guid UserId { get; set; } // <-- Dodaliśmy UserId
+            public Guid MealPlanItemId { get; set; }
+            public DateTime Date { get; set; }
         }
     }
 }
