@@ -16,6 +16,7 @@ public class CreateUserCommand : IRequest<Guid>
     public decimal Height { get; set; }
     public int Age { get; set; }
     public string Gender { get; set; } = string.Empty;
+    public decimal Multiplier { get; set; } // Dodane pole
 }
 
 // 2. HANDLER - logika zapisu do bazy
@@ -42,7 +43,8 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
             Weight = request.Weight,
             Height = request.Height,
             Age = request.Age,
-            Gender = request.Gender
+            Gender = request.Gender,
+            ActivityMultiplier = request.Multiplier // Zapis do encji
         };
 
         // Zapisujemy użytkownika do bazy (pamiętaj, że AddAsync w Twoim GenericRepository

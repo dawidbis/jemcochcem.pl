@@ -9,7 +9,7 @@ public class User
     public int Age { get; set; }
     public string Gender { get; set; } = string.Empty;
     public decimal? TargetWeight { get; set; }
-
+    public decimal ActivityMultiplier { get; set; } = 1.55m;
     public ICollection<BodyMeasurement> BodyMeasurements { get; set; } = new List<BodyMeasurement>();
     public ICollection<MealLog> MealLogs { get; set; } = new List<MealLog>();
 }
