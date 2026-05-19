@@ -3,10 +3,11 @@ import type { User } from './types';
 import { LoginForm } from './components/LoginForm';
 import { FoodDiary } from './components/FoodDiary';
 import { BodyMeasurements } from './components/BodyMeasurements';
+import { UserProfile } from './components/UserProfile';
 import './App.css';
 import { AppLayout } from '#components/AppLayout';
 
-type Page = 'diary' | 'measurements';
+type Page = 'diary' | 'measurements' | 'profile';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -21,8 +22,9 @@ export default function App() {
 
   return (
     <AppLayout onLogout={handleLogout} activePage={page} onNavigate={setPage}>
-      {page === 'diary' && <FoodDiary user={user} onLogout={handleLogout} />}
+      {page === 'diary' && <FoodDiary user={user} />}
       {page === 'measurements' && <BodyMeasurements user={user} />}
+      {page === 'profile' && <UserProfile userId={user.userId} />}
     </AppLayout>
   );
 }

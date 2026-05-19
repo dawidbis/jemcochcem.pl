@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { api } from '../api';
 import { Button } from "#components/ui/button";
 import { Input } from "#components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "#components/ui/card";
 
 export function ManualFoodForm({ onAdded }: { onAdded: () => void }) {
   const [form, setForm] = useState({ name: '', caloriesPer100g: 0, proteinPer100g: 0, carbsPer100g: 0, fatPer100g: 0 });
@@ -22,11 +21,11 @@ export function ManualFoodForm({ onAdded }: { onAdded: () => void }) {
   };
 
   return (
-    <Card className="shadow-sm border-slate-100">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold text-slate-700">Dodaj produkt ręcznie</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+        <h3 className="text-lg font-semibold text-slate-700">Dodaj produkt ręcznie</h3>
+      </div>
+      <div className="p-4">
         <form onSubmit={submit} className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Input className="col-span-2 sm:col-span-4 bg-slate-50 focus-visible:ring-blue-500" placeholder="Nazwa produktu" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
           
@@ -50,10 +49,10 @@ export function ManualFoodForm({ onAdded }: { onAdded: () => void }) {
             <Input type="number" step="0.1" className="bg-rose-50/50 focus-visible:ring-rose-500" placeholder="Tłuszcz" value={form.fatPer100g || ''} onChange={e => setForm({...form, fatPer100g: Number(e.target.value)})} required />
           </div>
           
-          <Button type="submit" className="col-span-2 sm:col-span-4 mt-2 bg-slate-800 hover:bg-slate-700">Dodaj do bazy</Button>
+          <Button type="submit" className="col-span-2 sm:col-span-4 mt-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">Dodaj do bazy</Button>
         </form>
         {status && <p className={`text-sm mt-4 font-medium px-3 py-2 rounded-lg text-center ${status.includes('Błąd') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{status}</p>}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

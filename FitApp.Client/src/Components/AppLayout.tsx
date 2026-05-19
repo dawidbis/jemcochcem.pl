@@ -1,7 +1,7 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";
-import { LogOut, Utensils, Scale } from "lucide-react";
+import { LogOut, Utensils, Scale, User } from "lucide-react";
 
-type Page = 'diary' | 'measurements';
+type Page = 'diary' | 'measurements' | 'profile';
 
 interface Props {
   children: React.ReactNode;
@@ -42,6 +42,19 @@ export function AppLayout({ children, onLogout, activePage, onNavigate }: Props)
                   >
                     <Scale className="mr-2 h-5 w-5" />
                     <span className="text-base">Pomiary</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => onNavigate('profile')}
+                    className={`w-full transition-colors rounded-lg py-6 font-medium ${
+                      activePage === 'profile'
+                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <User className="mr-2 h-5 w-5" />
+                    <span className="text-base">Mój Profil</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
