@@ -1,7 +1,7 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";
-import { LogOut, Utensils, Scale, User } from "lucide-react";
+import { LogOut, Utensils, Scale, User, CalendarDays  } from "lucide-react";
 
-type Page = 'diary' | 'measurements' | 'profile';
+type Page = 'diary' |'calendar'| 'measurements' | 'profile';
 
 interface Props {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ interface Props {
 
 export function AppLayout({ children, onLogout, activePage, onNavigate }: Props) {
   return (
-    <SidebarProvider>
+   <SidebarProvider>
       <div className="flex min-h-screen w-full bg-slate-50 font-sans text-slate-900">
         <Sidebar className="border-r border-slate-200 bg-white shadow-sm">
           <SidebarContent className="py-6">
@@ -29,6 +29,19 @@ export function AppLayout({ children, onLogout, activePage, onNavigate }: Props)
                   >
                     <Utensils className="mr-2 h-5 w-5" />
                     <span className="text-base">Dziennik</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => onNavigate('calendar')}
+                    className={`w-full transition-colors rounded-lg py-6 font-medium ${
+                      activePage === 'calendar'
+                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <CalendarDays className="mr-2 h-5 w-5" />
+                    <span className="text-base">Kalendarz</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

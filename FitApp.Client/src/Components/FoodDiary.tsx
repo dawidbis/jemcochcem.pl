@@ -14,14 +14,28 @@ export function FoodDiary({ user }: { user: User }) {
   const [externalFood, setExternalFood] = useState<ExternalFood | null>(null);
   const [grams, setGrams] = useState(100);
   const [targets, setTargets] = useState<TargetMacros | null>(null);
-  const TODAY = new Date().toISOString().split('T')[0];
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
 
-  const loadDiary = async () => {
-    const data = await api.loadDiary(TODAY, user.userId);
-    if (data) setDiary(data);
+  const isToday = selectedDate === new Date().toISOString().split('T')[0];
+
+  const changeDate = (days: number) => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + days);
+    if (d <= new Date()) setSelectedDate(d.toISOString().split('T')[0]);
   };
 
-  useEffect(() => { loadDiary(); }, []);
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const loadDiary = async () => {
+    const data = await api.loadDiary(selectedDate, user.userId);
+    if (data) setDiary(data);
+    else setDiary({ date: selectedDate, items: [], totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 });
+  };
+
+  useEffect(() => { loadDiary(); }, [selectedDate]);
 
   useEffect(() => {
     if (!search.trim()) { setResults([]); return; }
@@ -33,16 +47,16 @@ export function FoodDiary({ user }: { user: User }) {
   }, [search]);
   
   useEffect(() => {
-  api.calculateMacros(user.userId, 1.55).then(data => { // 1.55 jako fallback
-    if (data) setTargets({
-      tdee: data.tdee || data.targetCalories,
-      protein: data.protein,
-      carbs: data.carbs,
-      fats: data.fats || data.fat
+    api.calculateMacros(user.userId, 1.55).then((data: any) => {
+      if (data) setTargets({
+        tdee: data.tdee || data.targetCalories,
+        protein: data.protein,
+        carbs: data.carbs,
+        fats: data.fats || data.fat
+      });
     });
-  });
-}, 
-[user.userId]);
+  }, [user.userId]);
+
   const fetchExternal = async () => {
     const data = await api.fetchExternalFood(barcode);
     if (data) setExternalFood(data);
@@ -56,119 +70,174 @@ export function FoodDiary({ user }: { user: User }) {
   };
 
   const addMeal = async (foodId: string) => {
-    await api.addMealItem({ userId: user.userId, date: new Date().toISOString(), foodProductId: foodId, grams });
+    await api.addMealItem({ userId: user.userId, date: new Date(selectedDate).toISOString(), foodProductId: foodId, grams });
     loadDiary(); setResults([]); setSearch('');
   };
 
   const deleteMeal = async (itemId: string) => {
-    await api.deleteMealItem(TODAY, itemId, user.userId);
+    await api.deleteMealItem(selectedDate, itemId, user.userId);
     loadDiary();
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start w-full">
+    <div className="space-y-6 w-full max-w-7xl mx-auto">
       
-      {/* Kolumna 1: Formularze dodawania */}
-      <div className="space-y-6 w-full">    
-        <ManualFoodForm onAdded={() => setSearch('')} />
-        
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-            <h3 className="text-lg font-semibold text-slate-700">Skaner Open Food Facts</h3>
+      {/* Header z datą */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Dziennik posiłków</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Loguj posiłki i śledź dzienne cele</p>
+        </div>
+        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-sm">
+          <button onClick={() => changeDate(-1)} className="p-1 rounded-md hover:bg-slate-100 transition-colors text-slate-600 font-bold">←</button>
+          <div className="text-center min-w-[180px]">
+            <div className="text-sm font-semibold text-slate-700 capitalize">{formatDate(selectedDate)}</div>
+            {isToday && <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Dzisiaj</span>}
           </div>
-          <div className="p-4">
-            <div className="flex gap-2">
-              <Input className="bg-white focus-visible:ring-blue-500 flex-1" value={barcode} onChange={e => setBarcode(e.target.value)} placeholder="Kod kreskowy" /> 
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={fetchExternal}>Szukaj</Button>
+          <button onClick={() => changeDate(1)} disabled={isToday} className={`p-1 rounded-md transition-colors font-bold ${isToday ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-100'}`}>→</button>
+        </div>
+      </div>
+
+      {/* Podsumowanie kalorii */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">Kalorie</span>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalCalories || 0} <span className="text-base font-normal text-slate-400">/ {targets?.tdee || '-'}</span></p>
+          {targets?.tdee && diary ? (
+            <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalCalories / targets.tdee) * 100)}%` }} />
             </div>
-            {externalFood && (
-              <div className="p-4 border border-blue-100 rounded-xl bg-blue-50 flex flex-col gap-3 mt-4">
-                <strong className="text-blue-900">{externalFood.name}</strong>
-                <div className="flex justify-between items-center text-sm font-medium">
-                  <span>{externalFood.caloriesPer100g} kcal/100g</span>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={saveExternal}>Zapisz</Button>
+          ) : null}
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Białko</span>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalProtein || 0}<span className="text-base font-normal text-slate-400">g / {targets?.protein || '-'}g</span></p>
+          {targets?.protein && diary ? (
+            <div className="mt-3 h-2 bg-blue-50 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalProtein / targets.protein) * 100)}%` }} />
+            </div>
+          ) : null}
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <span className="text-xs text-amber-600 font-medium uppercase tracking-wider">Węglowodany</span>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalCarbs || 0}<span className="text-base font-normal text-slate-400">g / {targets?.carbs || '-'}g</span></p>
+          {targets?.carbs && diary ? (
+            <div className="mt-3 h-2 bg-amber-50 rounded-full overflow-hidden">
+              <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalCarbs / targets.carbs) * 100)}%` }} />
+            </div>
+          ) : null}
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <span className="text-xs text-rose-600 font-medium uppercase tracking-wider">Tłuszcz</span>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalFats || 0}<span className="text-base font-normal text-slate-400">g / {targets?.fats || '-'}g</span></p>
+          {targets?.fats && diary ? (
+            <div className="mt-3 h-2 bg-rose-50 rounded-full overflow-hidden">
+              <div className="h-full bg-rose-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalFats / targets.fats) * 100)}%` }} />
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
+        {/* Lewa: Lista posiłków + wyszukiwarka */}
+        <div className="space-y-6">
+          {/* Posiłki dnia */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-semibold text-slate-800">Posiłki</h2>
+              <span className="text-sm text-slate-400">{diary?.items?.length || 0} pozycji</span>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {diary?.items.map(item => (
+                <div key={item.id} className="flex justify-between items-center px-5 py-4 hover:bg-slate-50 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <strong className="text-slate-800">{item.foodName}</strong>
+                      <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{item.grams}g</span>
+                    </div>
+                    <div className="flex items-center gap-4 mt-1.5">
+                      <span className="text-sm font-bold text-slate-700">{item.calories} kcal</span>
+                      <div className="flex gap-3 text-xs font-medium">
+                        <span className="text-blue-600">B: {item.macros?.protein}g</span>
+                        <span className="text-amber-600">W: {item.macros?.carbs}g</span>
+                        <span className="text-rose-600">T: {item.macros?.fats}g</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Button variant="ghost" className="text-slate-300 hover:text-red-600 hover:bg-red-50 h-8 w-8 p-0 rounded-full shrink-0" onClick={() => deleteMeal(item.id)}>✖</Button>
                 </div>
+              ))}
+              {!diary?.items?.length && (
+                <div className="text-center py-16 text-slate-400">
+                  <p className="text-4xl mb-3">🍽️</p>
+                  <p className="font-medium">Brak posiłków</p>
+                  <p className="text-sm mt-1">Wyszukaj produkt i dodaj go do dziennika</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Wyszukiwarka */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-slate-100">
+              <h3 className="font-semibold text-slate-800 mb-3">Wyszukaj produkt</h3>
+              <Input value={search} onChange={(e: any) => setSearch(e.target.value)} placeholder="Wpisz nazwę produktu..." className="bg-slate-50 focus-visible:ring-blue-500 text-base py-5" />
+            </div>
+            {(results.length > 0 || search.length > 0) && (
+              <div className="max-h-80 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
+                {results.map(f => (
+                  <div key={f.id} className="p-4 border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all bg-white flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <strong className="text-slate-800">{f.name}</strong>
+                      <span className="text-sm text-slate-400 ml-2">{f.caloriesPer100g} kcal/100g</span>
+                      <div className="flex gap-2 mt-1.5 text-xs font-semibold">
+                        <span className="text-blue-600">B: {f.macros?.protein || 0}</span>
+                        <span className="text-amber-600">W: {f.macros?.carbs || 0}</span>
+                        <span className="text-rose-600">T: {f.macros?.fats || 0}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Input type="number" className="w-16 text-center bg-slate-50 h-9 text-sm" value={grams} onChange={(e: any) => setGrams(Number(e.target.value))} />
+                      <span className="text-xs text-slate-400">g</span>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => addMeal(f.id)}>Dodaj</Button>
+                    </div>
+                  </div>
+                ))}
+                {results.length === 0 && search.length > 0 && (
+                  <div className="text-center py-6 text-slate-400 text-sm">Brak wyników dla "{search}"</div>
+                )}
               </div>
             )}
           </div>
         </div>
-      </div>
 
-      {/* Kolumna 2: Wyniki Wyszukiwania */}
-      <div className="space-y-6 w-full">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col xl:max-h-[calc(100vh-8rem)]">
-          <div className="p-5 bg-slate-50/50 border-b border-slate-100">
-            <h3 className="text-lg font-semibold text-slate-700">Wyszukiwarka bazy</h3>
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Wpisz nazwę produktu..." className="mt-3 bg-white focus-visible:ring-blue-500 text-base py-5 shadow-sm" />
-          </div>
-          <div className="overflow-y-auto p-4 space-y-3 flex-1 bg-slate-50/30">
-            {results.map(f => (
-              <div key={f.id} className="p-4 border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all bg-white flex flex-col gap-3">
-                <div>
-                  <strong className="text-slate-800 text-lg">{f.name}</strong> <span className="text-sm font-medium text-slate-500 ml-2">{f.caloriesPer100g} kcal/100g</span>
-                  <div className="flex gap-2 mt-2 text-xs font-semibold">
-                    <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md">B: {f.macros?.protein || 0}</span>
-                    <span className="bg-amber-50 text-amber-700 px-2 py-1 rounded-md">W: {f.macros?.carbs || 0}</span>
-                    <span className="bg-rose-50 text-rose-700 px-2 py-1 rounded-md">T: {f.macros?.fats || 0}</span>
+        {/* Prawa: Dodawanie produktów */}
+        <div className="space-y-6">
+          <ManualFoodForm onAdded={() => setSearch('')} />
+          
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <h3 className="font-semibold text-slate-800">Skaner kodów</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Wyszukaj produkt po kodzie kreskowym</p>
+            </div>
+            <div className="p-5">
+              <div className="flex gap-2">
+                <Input className="bg-slate-50 focus-visible:ring-blue-500 flex-1" value={barcode} onChange={(e: any) => setBarcode(e.target.value)} placeholder="Kod kreskowy" /> 
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={fetchExternal}>Szukaj</Button>
+              </div>
+              {externalFood && (
+                <div className="p-4 border border-blue-100 rounded-xl bg-blue-50 flex flex-col gap-3 mt-4">
+                  <strong className="text-blue-900">{externalFood.name}</strong>
+                  <div className="flex justify-between items-center text-sm font-medium">
+                    <span>{externalFood.caloriesPer100g} kcal/100g</span>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={saveExternal}>Zapisz</Button>
                   </div>
                 </div>
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-1">
-                  <Input type="number" className="w-20 text-center bg-slate-50 h-9" value={grams} onChange={e => setGrams(Number(e.target.value))} />
-                  <span className="text-sm font-medium text-slate-500 mr-1">g</span>
-                  <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" onClick={() => addMeal(f.id)}>Dodaj</Button>
-                </div>
-              </div>
-            ))}
-            {results.length === 0 && search.length > 0 && (
-              <div className="text-center py-8 text-slate-500 font-medium">Brak wyników.</div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Kolumna 3: Dziennik Posiłków */}
-      <div className="space-y-6 w-full">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xl sticky top-24 overflow-hidden flex flex-col xl:max-h-[calc(100vh-8rem)]">
-          <div className="bg-slate-900 text-white p-6 shrink-0">
-            <h2 className="text-2xl font-bold tracking-tight">Kcal: {diary?.totalCalories || 0} / {targets?.tdee || '-'}</h2>
-            <div className="grid grid-cols-3 gap-3 mt-5 text-center text-sm font-medium">
-              <div className="bg-white/10 p-3 rounded-xl border border-white/5">
-                <span className="block text-slate-400 text-[10px] uppercase tracking-wider mb-1">Białko</span>
-                {diary?.totalProtein || 0} / {targets?.protein || '-'}g
-              </div>
-              <div className="bg-white/10 p-3 rounded-xl border border-white/5">
-                <span className="block text-slate-400 text-[10px] uppercase tracking-wider mb-1">Węgle</span>
-                {diary?.totalCarbs || 0} / {targets?.carbs || '-'}g
-              </div>
-              <div className="bg-white/10 p-3 rounded-xl border border-white/5">
-                <span className="block text-slate-400 text-[10px] uppercase tracking-wider mb-1">Tłuszcz</span>
-                {diary?.totalFats || 0} / {targets?.fats || '-'}g
-              </div>
+              )}
             </div>
           </div>
-          <div className="overflow-y-auto divide-y divide-slate-100 flex-1">
-            {diary?.items.map(item => (
-              <div key={item.id} className="flex justify-between items-center p-5 hover:bg-slate-50 transition-colors">
-                <div>
-                  <strong className="text-slate-800">{item.foodName}</strong> 
-                  <span className="text-xs font-semibold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full ml-2">{item.grams}g</span>
-                  <div className="text-sm font-bold text-slate-700 mt-1.5">{item.calories} kcal</div>
-                  <div className="flex gap-2 text-xs font-medium mt-1.5">
-                    <span className="text-blue-600">B: {item.macros?.protein}</span>
-                    <span className="text-amber-600">W: {item.macros?.carbs}</span>
-                    <span className="text-rose-600">T: {item.macros?.fats}</span>
-                  </div>
-                </div>
-                <Button variant="ghost" className="text-slate-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 p-0 rounded-full" onClick={() => deleteMeal(item.id)}>✖</Button>
-              </div>
-            ))}
-            {!diary?.items?.length && (
-              <div className="text-center py-12 text-slate-400 text-sm font-medium">Brak posiłków. Dodaj coś z wyszukiwarki!</div>
-            )}
-          </div>
         </div>
       </div>
-
     </div>
   );
 }

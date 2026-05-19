@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import type { User } from './types';
-import { LoginForm } from './components/LoginForm';
-import { FoodDiary } from './components/FoodDiary';
-import { BodyMeasurements } from './components/BodyMeasurements';
-import { UserProfile } from './components/UserProfile';
+import { LoginForm } from './Components/LoginForm';
+import { FoodDiary } from './Components/FoodDiary';
+import { DietCalendar } from './Components/Dietcalendar';
+import { BodyMeasurements } from './Components/BodyMeasurements';
+import { UserProfile } from './Components/UserProfile';
 import './App.css';
 import { AppLayout } from '#components/AppLayout';
 
-type Page = 'diary' | 'measurements' | 'profile';
+type Page = 'diary' | 'calendar' | 'measurements' | 'profile';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -23,6 +24,7 @@ export default function App() {
   return (
     <AppLayout onLogout={handleLogout} activePage={page} onNavigate={setPage}>
       {page === 'diary' && <FoodDiary user={user} />}
+      {page === 'calendar' && <DietCalendar user={user} />}
       {page === 'measurements' && <BodyMeasurements user={user} />}
       {page === 'profile' && <UserProfile userId={user.userId} />}
     </AppLayout>

@@ -4,6 +4,7 @@ using FitApp.Infrastructure;
 using FitApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
