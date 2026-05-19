@@ -1,7 +1,16 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";
-import { LogOut, Utensils } from "lucide-react";
+import { LogOut, Utensils, Scale } from "lucide-react";
 
-export function AppLayout({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) {
+type Page = 'diary' | 'measurements';
+
+interface Props {
+  children: React.ReactNode;
+  onLogout: () => void;
+  activePage: Page;
+  onNavigate: (page: Page) => void;
+}
+
+export function AppLayout({ children, onLogout, activePage, onNavigate }: Props) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-slate-50 font-sans text-slate-900">
@@ -10,13 +19,36 @@ export function AppLayout({ children, onLogout }: { children: React.ReactNode, o
             <SidebarGroup>
               <SidebarMenu className="space-y-2 px-4">
                 <SidebarMenuItem>
-                  <SidebarMenuButton className="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors rounded-lg py-6 font-medium">
+                  <SidebarMenuButton
+                    onClick={() => onNavigate('diary')}
+                    className={`w-full transition-colors rounded-lg py-6 font-medium ${
+                      activePage === 'diary'
+                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
                     <Utensils className="mr-2 h-5 w-5" />
                     <span className="text-base">Dziennik</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton className="w-full text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors rounded-lg py-6 mt-4 font-medium" onClick={onLogout}>
+                  <SidebarMenuButton
+                    onClick={() => onNavigate('measurements')}
+                    className={`w-full transition-colors rounded-lg py-6 font-medium ${
+                      activePage === 'measurements'
+                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Scale className="mr-2 h-5 w-5" />
+                    <span className="text-base">Pomiary</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="w-full text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors rounded-lg py-6 mt-4 font-medium"
+                    onClick={onLogout}
+                  >
                     <LogOut className="mr-2 h-5 w-5" />
                     <span className="text-base">Wyloguj</span>
                   </SidebarMenuButton>

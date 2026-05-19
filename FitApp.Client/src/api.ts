@@ -1,4 +1,4 @@
-import type {  DiarySummary, Food, ExternalFood } from './types';
+import type { DiarySummary, Food, ExternalFood, Measurement, MeasurementStats, CreateMeasurementPayload } from './types';
 
 export const api = {
   async loadDiary(date: string, userId: string): Promise<DiarySummary | null> {
@@ -27,5 +27,37 @@ export const api = {
   },
   async register(payload: any) {
     return fetch('/api/users/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-  }
+  },
+
+  // Measurements
+  async getMeasurements(userId: string): Promise<Measurement[]> {
+    const res = await fetch(`/api/measurements/user/${userId}`);
+    return res.ok ? res.json() : [];
+  },
+  async getMeasurementStats(userId: string): Promise<MeasurementStats | null> {
+    const res = await fetch(`/api/measurements/user/${userId}/stats`);
+    return res.ok ? res.json() : null;
+  },
+  async createMeasurement(payload: CreateMeasurementPayload): Promise<string | null> {
+    const res = await fetch('/api/measurements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.id;
+  },
+  async deleteMeasurement(id: string): Promise<boolean> {
+    const res = await fetch(`/api/measurements/${id}`, { method: 'DELETE' });
+    return res.ok;
+  },
+  async setTargetWeight(userId: string, targetWeight: number | null): Promise<boolean> {
+    const res = await fetch(`/api/users/${userId}/target-weight`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetWeight }),
+    });
+    return res.ok;
+  },
 };

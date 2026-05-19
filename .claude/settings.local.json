@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"C:\\\\Users\\\\wiecz\\\\Desktop\\\\jemCoChcem\\\\jemcochcem.pl\\\\FitApp.Client\\\\src\" -type f -name \"*.tsx\" -o -name \"*.ts\" | head -25)"
+    ]
+  }
+}

@@ -1,39 +1,40 @@
 namespace FitApp.Application.Features.Diet;
 
 using MediatR;
-using FitApp.Domain.Entities;   
+using FitApp.Domain.Entities;
 using FitApp.Infrastructure.Interfaces;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
-// 1. Definicja danych wejściowych (To, co widać w Request Body w Swaggerze)
-public record CreateMeasurementCommand(Guid UserId, decimal Weight, DateTime Date) : IRequest<Guid>;
+public record CreateMeasurementCommand(
+    Guid UserId,
+    decimal Weight,
+    DateTime Date,
+    decimal? BodyFatPercentage = null,
+    decimal? Waist = null,
+    decimal? Hips = null,
+    string? Notes = null
+) : IRequest<Guid>;
 
-// 2. Handler - Logika zapisu do bazy
 public class CreateMeasurementHandler : IRequestHandler<CreateMeasurementCommand, Guid>
 {
     private readonly IBodyMeasurementRepository _repository;
 
-    public CreateMeasurementHandler(IBodyMeasurementRepository repository)
-    {
-        _repository = repository;
-    }
+    public CreateMeasurementHandler(IBodyMeasurementRepository repository) => _repository = repository;
 
     public async Task<Guid> Handle(CreateMeasurementCommand request, CancellationToken ct)
     {
-        // Mapujemy komendę na encję bazodanową
         var measurement = new BodyMeasurement
         {
             Id = Guid.NewGuid(),
             UserId = request.UserId,
             Weight = request.Weight,
-            Date = request.Date
+            Date = request.Date,
+            BodyFatPercentage = request.BodyFatPercentage,
+            Waist = request.Waist,
+            Hips = request.Hips,
+            Notes = request.Notes
         };
 
-        // Zapisujemy przez repozytorium
         await _repository.AddAsync(measurement);
-        
         return measurement.Id;
     }
 }

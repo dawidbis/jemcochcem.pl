@@ -4,3 +4,35 @@ export interface Food { id: string; name: string; caloriesPer100g: number; macro
 export interface MealItem { id: string; foodName: string; grams: number; calories: number; macros: MacroNutrients; }
 export interface DiarySummary { date: string; totalCalories: number; totalProtein: number; totalCarbs: number; totalFats: number; items: MealItem[]; }
 export interface ExternalFood { name: string; barcode: string; caloriesPer100g: number; macros: MacroNutrients; }
+
+export interface Measurement {
+  id: string;
+  date: string;
+  weight: number;
+  bodyFatPercentage?: number | null;
+  waist?: number | null;
+  hips?: number | null;
+  notes?: string | null;
+  bmi?: number | null;
+}
+
+export interface MeasurementStats {
+  latestWeight?: number | null;
+  previousWeight?: number | null;
+  weightChange?: number | null;
+  currentBmi?: number | null;
+  bmiCategory?: string | null;
+  targetWeight?: number | null;
+  progressPercent?: number | null;
+  totalMeasurements: number;
+}
+
+export interface CreateMeasurementPayload {
+  userId: string;
+  weight: number;
+  date: string;
+  bodyFatPercentage?: number | null;
+  waist?: number | null;
+  hips?: number | null;
+  notes?: string | null;
+}

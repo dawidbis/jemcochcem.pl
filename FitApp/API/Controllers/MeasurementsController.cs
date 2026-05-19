@@ -1,7 +1,7 @@
 using FitApp.Application.Features.Diet;
+using FitApp.Application.Features.Measurements;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using FitApp.Infrastructure.Interfaces;
 
 namespace FitApp.API.Controllers;
 
@@ -10,15 +10,9 @@ namespace FitApp.API.Controllers;
 public class MeasurementsController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IBodyMeasurementRepository _measurementRepository;
 
-    public MeasurementsController(IMediator mediator, IBodyMeasurementRepository measurementRepository)
-    {
-        _mediator = mediator;
-        _measurementRepository = measurementRepository;
-    }
+    public MeasurementsController(IMediator mediator) => _mediator = mediator;
 
-    // Istniejący POST (przez Mediator)
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateMeasurementCommand command)
     {
@@ -26,30 +20,24 @@ public class MeasurementsController : ControllerBase
         return Ok(new { Id = id });
     }
 
-    // NOWY: Pobieranie historii dla konkretnego użytkownika
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetHistory(Guid userId)
     {
-        var history = await _measurementRepository.GetUserHistoryAsync(userId);
-        
-        // Mapujemy na DTO, żeby nie zwracać surowych encji z bazy
-        var result = history.Select(m => new {
-            m.Id,
-            m.Weight,
-            m.Date
-        }).OrderByDescending(m => m.Date);
-
+        var result = await _mediator.Send(new GetMeasurementsQuery(userId));
         return Ok(result);
     }
 
-    // NOWY: Usuwanie błędnego wpisu
+    [HttpGet("user/{userId}/stats")]
+    public async Task<IActionResult> GetStats(Guid userId)
+    {
+        var result = await _mediator.Send(new GetMeasurementStatsQuery(userId));
+        return Ok(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var measurement = await _measurementRepository.GetByIdAsync(id);
-        if (measurement == null) return NotFound();
-
-        await _measurementRepository.RemoveAsync(measurement);
-        return NoContent();
+        var result = await _mediator.Send(new DeleteMeasurementCommand(id));
+        return result ? NoContent() : NotFound();
     }
 }
