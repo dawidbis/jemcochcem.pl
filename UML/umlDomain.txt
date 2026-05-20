@@ -45,6 +45,9 @@ package "Entities" {
         + DateTime Date
         + decimal Weight
         + decimal BodyFatPercentage
+        + decimal Waist
+        + decimal Hips 
+        + decimal Notes
     }
 
     ' --- NOWE KLASY AI ---
