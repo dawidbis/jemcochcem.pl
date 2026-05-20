@@ -19,6 +19,7 @@
 - [Moduły funkcjonalne](#-moduły-funkcjonalne)
 - [REST API](#-rest-api)
 - [Struktura projektu](#-struktura-projektu)
+- [Instrukcja dla Developerów (Klucze API)](#-instrukcja-dla-developerów)
 - [Plan iteracji](#-plan-iteracji)
 
 ---
@@ -31,7 +32,7 @@ FitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do k
 | :--- | :--- |
 | **Dziennik Diety** | Logowanie posiłków, kalkulator TDEE/BMR, skanowanie kodów kreskowych (Open Food Facts). |
 | **Pomiary Ciała** | Śledzenie wagi, obwodów i poziomu tkanki tłuszczowej na osi czasu. |
-| **AI Support** | Szybka analiza kalorii ze zdjęcia talerza i konsultacja z AI Coachem (Claude API). |
+| **AI Support (Gemini)** | Generowanie zbilansowanych planów dietetycznych oraz bezpośrednie dodawanie ich do dziennika dzięki wsparciu AI. |
 
 ---
 
@@ -39,13 +40,13 @@ FitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do k
 
 ### `[User]` — Użytkownik
 * Oblicza zapotrzebowanie kaloryczne (TDEE).
-* Prowadzi codzienny dziennik posiłków (ręcznie lub skanerem).
+* Prowadzi codzienny dziennik posiłków (ręcznie, skanerem lub za pomocą asystenta AI).
 * Analizuje postępy sylwetkowe na interaktywnych wykresach.
-* Korzysta z analizy zdjęć posiłków przez AI.
+* Generuje plany dietetyczne na podstawie własnych preferencji.
 
 ### `[System]` — Zewnętrzne API
 * **Open Food Facts API** — globalna baza produktów spożywczych (barcode lookup).
-* **Claude API (Anthropic)** — zaawansowany silnik AI do analizy zdjęć i porad dietetycznych.
+* **Google Gemini API** — zaawansowany silnik AI do generowania spersonalizowanych planów posiłków i wyliczania makroskładników.
 
 ---
 
@@ -65,7 +66,7 @@ FitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do k
 | Technologia | Zastosowanie |
 | :--- | :--- |
 | **ASP.NET Core 8.0** | Silnik REST API (C# 12). |
-| **EF Core 8** | ORM do komunikacji z bazą danych SQL Server. |
+| **EF Core 8** | ORM do komunikacji z bazą danych SQL Server / PostgreSQL. |
 | **Redis** | Szybki cache dla wyszukiwań produktów (OFF API). |
 | **MediatR** | Implementacja wzorca CQRS dla czystej logiki biznesowej. |
 | **JWT** | Bezpieczna autoryzacja (Access + Refresh Tokens). |
@@ -76,8 +77,9 @@ FitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do k
 
 * **Users**: Profile użytkowników, dane logowania i preferencje.
 * **UserGoals**: Aktualne cele (kcal, białko, węglowodany, tłuszcze).
-* **FoodProducts**: Lokalna baza produktów + zbuforowane dane z OFF API.
+* **FoodProducts**: Lokalna baza produktów + produkty dodane przez AI.
 * **MealLogs / MealLogItems**: Rejestr dziennego spożycia z podziałem na posiłki.
+* **MealPlans / MealPlanItems**: Zapisane plany dietetyczne wygenerowane przez sztuczną inteligencję.
 * **BodyMeasurements**: Historia wagi oraz precyzyjnych wymiarów ciała.
 
 ---
@@ -90,150 +92,58 @@ FitApp to darmowa platforma (Open Source / Projekt zaliczeniowy) służąca do k
 * **Baza produktów**: Mechanizm fallback (szukaj lokalnie -> szukaj w OFF API).
 * **Dzienny dashboard**: Procentowa i wizualna realizacja celów B/W/T.
 
-### Moduł AI
-* **Wizualna ocena posiłku**: Przetworzenie zdjęcia przez AI w celu estymacji kalorii.
-* **Chatbot**: Interaktywne pytania o zamienniki produktów lub porady dietetyczne.
+### Moduł AI & Planowanie (Nowość!)
+* **Generowanie Planów Dietetycznych**: Tworzenie zbilansowanych jadłospisów w formacie JSON na podstawie zapytania użytkownika (np. "dieta keto 2000 kcal").
+* **Inteligentne Dodawanie (`AddAiDailyPlan`)**: Automatyczne przeniesienie wygenerowanego planu do właściwego Dziennika Posiłków wraz z dynamicznym przeliczaniem sum kalorycznych.
 
 ---
 
 ## 🌐 REST API
 
 ### 👤 Moduł: Users & Profile
-*Zarządzanie kontem, celami kalorycznymi i danymi biometrycznymi.*
-
 | Metoda | Endpoint | Opis |
 | :--- | :--- | :--- |
-| `POST` | `/api/Users/register` | Rejestracja nowego użytkownika w systemie. |
-| `POST` | `/api/Users/login` | Autoryzacja i pobranie podstawowych danych sesji. |
-| `GET` | `/api/Users/{id}` | Pobranie danych profilowych (wiek, wzrost, płeć). |
-| `PUT` | `/api/Users/{id}` | Aktualizacja danych profilu użytkownika. |
-| `POST` | `/api/Users/{id}/macros` | Obliczenie TDEE i ustawienie celów makroskładników. |
-
----
+| `POST` | `/api/Users/register` | Rejestracja nowego użytkownika. |
+| `POST` | `/api/Users/login` | Autoryzacja i pobranie tokenów JWT. |
+| `POST` | `/api/Users/{id}/macros` | Obliczenie TDEE i celów makroskładników. |
 
 ### 🍎 Moduł: Foods (Baza Produktów)
-*Zarządzanie produktami lokalnymi oraz integracja z zewnętrznymi bazami danych.*
-
 | Metoda | Endpoint | Opis |
 | :--- | :--- | :--- |
-| `GET` | `/api/Foods/search` | Wyszukiwanie produktów (lokalne + query string). |
-| `GET` | `/api/Foods/{id}` | Pobranie szczegółowych informacji o produkcie po ID. |
-| `POST` | `/api/Foods` | Dodanie nowego, autorskiego produktu do lokalnej bazy. |
-| `PUT` | `/api/Foods/{id}` | Edycja istniejącego produktu (korekta makroskładników). |
+| `GET` | `/api/Foods/search` | Wyszukiwanie produktów (lokalne + OFF API). |
 | `GET` | `/api/Foods/external/{barcode}` | Pobranie danych z Open Food Facts. |
 
----
-
 ### 📅 Moduł: Diary (Dziennik Posiłków)
-*Operacje na dziennym spożyciu i logowanie posiłków.*
-
 | Metoda | Endpoint | Opis |
 | :--- | :--- | :--- |
-| `GET` | `/api/Diary/{userId}/{date}` | Pobranie wpisów i podsumowania makro z danego dnia. |
-| `POST` | `/api/Diary/items` | Dodanie produktu do wybranego posiłku (np. Śniadanie). |
-| `POST` | `/api/Diary/items/barcode` | Szybkie dodanie produktu do dziennika via skaner kodów. |
-| `PUT` | `/api/Diary/items/{id}` | Zmiana ilości (gramatury) dodanej pozycji. |
-| `DELETE` | `/api/Diary/items/{id}` | Usunięcie produktu z dziennika posiłków. |
+| `GET` | `/api/Diary/{userId}/{date}` | Pobranie podsumowania dnia z wyliczonym makro. |
+| `POST` | `/api/Diary/items` | Ręczne dodanie produktu do dziennika. |
+| `POST` | `/api/Diary/add-ai-daily-plan` | Dodanie wygenerowanego przez AI planu dnia prosto do dziennika. |
+
+### 🤖 Moduł: AI Meal Plans (MediatR CQRS)
+| Metoda | Endpoint | Opis |
+| :--- | :--- | :--- |
+| `POST` | `/api/MealPlans/generate` | Wysyła prompt do Google Gemini i generuje plan posiłków. |
 
 ---
 
-### 📉 Moduł: Measurements (Postępy)
-*Monitorowanie zmian masy ciała i wymiarów.*
-
-| Metoda | Endpoint | Opis |
-| :--- | :--- | :--- |
-| `POST` | `/api/Measurements` | Zapisanie nowego pomiaru wagi/ciała. |
-| `GET` | `/api/Measurements/user/{userId}` | Pobranie pełnej historii pomiarów dla wykresów. |
-| `DELETE` | `/api/Measurements/{id}` | Usunięcie błędnego wpisu historycznego. |
-
----
-
-### 🤖 Moduł: AI Support
-*Interakcja z modelem językowym Claude.*
-
-| Metoda | Endpoint | Opis |
-| :--- | :--- | :--- |
-| `POST` | `/api/AI/analyze-photo` | Estymacja wartości odżywczych na podstawie zdjęcia. |
-| `POST` | `/api/AI/chat` | Konsultacja z AI Coachem w kontekście diety. |
-
----
-
-## 📁 Struktura projektu
+## 📁 Struktura projektu (Czysta Architektura)
 
 ```text
 FitApp/
-├── FitApp.sln
-├── docker-compose.yml
-├── .gitignore
-│
 ├── src/
-│   ├── FitApp.Domain/                  # Warstwa serca (Domain Driven Design)
-│   │   ├── Entities/                   # User, MealLog, MealLogItem, FoodProduct, BodyMeasurement
-│   │   ├── ValueObjects/               # MacroNutrients (B/W/T), CalorieGoal
-│   │   ├── Interfaces/                 # Abstrakcje: IUserRepository, IFoodRepository, IBodyMeasurementRepository
-│   │   └── Exceptions/                 # DomainException (specyficzne błędy biznesowe)
-│   │
+│   ├── FitApp.Domain/                  # Encje, ValueObjects, Interfejsy
 │   ├── FitApp.Application/             # Warstwa Logiki (CQRS + MediatR)
-│   │   ├── Features/                   # Pionowe plastry (Vertical Slices) funkcjonalności
-│   │   │   ├── Diary/                  # Dziennik: AddMealItem, DeleteMealItem, GetDailyDiary
-│   │   │   ├── Foods/                  # Baza produktów: CreateFood, UpdateFood, SearchFoods,FetchExternal
-│   │   │   ├── Measurements/           # Postępy: AddMeasurement, DeleteMeasurement, GetHistory
-│   │   │   ├── Users/                  # Profil i Cele: UpdateProfile, CalculateMacros, GetUserProfile
-│   │   │   ├── AI/                     # Moduł AI: AnalyzeMealPhoto, AskAiCoach
-│   │   │   └── Auth/                   # Autoryzacja: Login, Register
-│   │   ├── DTOs/                       # Obiekty transferu danych (UserDto, DiaryDto, FoodDto, MeasurementDto)
-│   │   ├── Validators/                 # FluentValidation (reguły walidacji komend i zapytań)
-│   │   └── Interfaces/                 # Abstrakcje serwisów: IClaudeAiService, IOffApiClient, IRedisCache
-│   │
+│   │   ├── Features/                   # Pionowe plastry (Vertical Slices)
+│   │   │   ├── Diary/                  # GetDailyDiary, AddAiDailyPlanToDiary
+│   │   │   ├── Foods/                  # SearchFoods, FetchExternal
+│   │   │   └── AI_MealPlans/           # Moduł AI: GenerateMealPlan
+│   │   ├── DTOs/                       # Obiekty transferu danych (np. AiMealPlanItemDto)
+│   │   └── Interfaces/                 # Abstrakcje serwisów (np. IAiService)
 │   ├── FitApp.Infrastructure/          # Warstwa Techniczna (Implementacje)
-│   │   ├── Data/
-│   │   │   ├── AppDbContext.cs         # Konfiguracja EF Core i Fluent API
-│   │   │   ├── Migrations/             # Migracje bazy danych SQL Server
-│   │   │   └── Repositories/           # Konkretne implementacje dostępu do danych
-│   │   ├── ExternalServices/
-│   │   │   ├── OpenFoodFactsClient.cs  # Klient API zewnętrznej bazy produktów
-│   │   │   └── ClaudeAiService.cs      # Integracja z Anthropic Claude API
-│   │   └── Cache/
-│   │       └── RedisCacheService.cs    # Buforowanie wyników (TTL 24h)
-│   │
+│   │   ├── Data/                       # AppDbContext, Repositories (MealPlanRepository)
+│   │   └── ExternalServices/           # GeminiAiService, OpenFoodFactsClient
 │   └── FitApp.API/                     # Warstwa Prezentacji (REST Endpoints)
-│       ├── Controllers/                # UsersController, FoodsController, DiaryController, MeasurementsController
-│       ├── Middleware/                 # ExceptionHandler (globalny), JwtMiddleware (auth)
-│       └── Program.cs                  # Konfiguracja kontenera DI i potoku HTTP
-│
-├── tests/                              # Testy automatyczne
-│   ├── FitApp.UnitTests/               # Testy jednostkowe logiki biznesowej i encji
-│   └── FitApp.IntegrationTests/        # Testy integracyjne endpointów API
-│
+├── tests/
+│   └── FitApp.UnitTests/               # Testy jednostkowe Handelerów (xUnit + Moq)
 └── FitApp.Client/                      # Frontend (React 18 + TS + Vite)
-    ├── src/
-    │   ├── api/                        # Konfiguracja Axios i interceptory JWT
-    │   ├── features/                   # Moduły UI (auth, diet, measurements, ai)
-    │   ├── components/                 # Współdzielone UI (shadcn/ui)
-    │   ├── hooks/                      # Customowe hooki (useAuth, useMeasurements)
-    │   ├── types/                      # Wspólne interfejsy TypeScript (odpowiedniki DTO)
-    │   ├── lib/                        # Konfiguracja TanStack Query i Tailwind
-    │   ├── App.tsx                     # Główny router aplikacji
-    │   └── main.tsx                    # Punkt wejścia
-    └── .env                            # Zmienne środowiskowe (API_URL)
--------------------------------------------------------------------------
-PLAN ITERACJI (Core Edition)
--------------------------------------------------------------------------
-
-Etap I: MVP (Minimum Viable Product)
-- System autoryzacji (JWT: Register/Login).
-- Profil użytkownika + automatyczny kalkulator zapotrzebowania TDEE.
-- Podstawowy dziennik posiłków (dodawanie/usuwanie pozycji).
-- Integracja z Open Food Facts (wyszukiwanie produktów + skaner kodów).
-
-Etap II: Analityka i Cache
-- Moduł pomiarów ciała (waga, obwody) z historią.
-- Wizualizacja postępów na wykresach (Recharts).
-- Wdrożenie Redis Cache dla wyników wyszukiwania produktów.
-- Optymalizacja bazy danych (indeksy pod daty i UserId).
-
-Etap III: AI Update
-- Integracja z Claude AI API (Anthropic).
-- Moduł "Analyze Photo" (estymacja kalorii na podstawie przesłanego zdjęcia).
-- Czat z AI Coachem (porady dietetyczne w oparciu o kontekst użytkownika).
-- Eksport raportów tygodniowych do formatu tekstowego/PDF.

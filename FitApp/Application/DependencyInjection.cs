@@ -14,6 +14,8 @@ public static class DependencyInjection
         services.AddScoped<MealLogDomainService>();
         services.AddScoped<TdeeCalculationService>();
         services.AddHttpClient<IOffApiClient, OpenFoodFactsClient>();
+        // W pliku DependencyInjection.cs lub Program.cs
+        services.AddHttpClient<IAiService, AiService>();
         return services;
     }
 }

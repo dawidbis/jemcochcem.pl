@@ -36,3 +36,22 @@ export interface CreateMeasurementPayload {
   hips?: number | null;
   notes?: string | null;
 }
+
+export interface AiMealPlanItem {
+  id: string;
+  mealType: string;
+  productName: string;
+  grams: number;
+  calories: number;
+  proteins: number;
+  carbs: number; // Zmienione z carbohydrates!
+  fats: number;
+  foodProductId?: string | null;
+}
+
+export interface AiMealPlan {
+  id: string;
+  prompt: string;
+  createdAt: string;
+  items: AiMealPlanItem[];
+}

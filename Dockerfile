@@ -2,7 +2,7 @@
 FROM node:20-alpine AS frontend
 WORKDIR /app
 COPY FitApp.Client/package*.json ./
-RUN npm ci
+RUN npm install
 COPY FitApp.Client/ ./
 RUN npm run build
 

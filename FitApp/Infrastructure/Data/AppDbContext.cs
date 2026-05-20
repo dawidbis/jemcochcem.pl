@@ -12,6 +12,9 @@ public class AppDbContext : DbContext
     public DbSet<FoodProduct> FoodProducts { get; set; } = null!;
     public DbSet<BodyMeasurement> BodyMeasurements { get; set; } = null!;
 
+    public DbSet<MealPlan> MealPlans { get; set; }
+    public DbSet<MealPlanItem> MealPlanItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<BodyMeasurement>()
@@ -25,5 +28,11 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<User>()
             .Property(u => u.TargetWeight).HasPrecision(5, 2);
+
+        modelBuilder.Entity<MealPlan>()
+            .HasMany(mp => mp.Items)
+            .WithOne(mpi => mpi.MealPlan)
+            .HasForeignKey(mpi => mpi.MealPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 // Dodajemy using do naszych interfejsów i serwisów
 using FitApp.Domain.Interfaces;
 using FitApp.Domain.Services;
+using FitApp.Infrastructure.ExternalServices;
+using FitApp.Application.Interfaces;
 
 public static class DependencyInjection
 {
@@ -25,7 +27,8 @@ public static class DependencyInjection
         // --- REJESTRACJA WARSTWY BLL (PUNKT 2) ---
         services.AddScoped<INutritionCalculationService, NutritionCalculationService>();
         services.AddScoped<IMealLogDomainService, MealLogDomainService>();
-
+        services.AddScoped<IMealPlanRepository, MealPlanRepository>();
+        services.AddHttpClient<IAiService, AiService>();
         return services;
     }
 }

@@ -29,5 +29,7 @@ services:
     depends_on:
         db:
           condition: service_healthy
+    env_file:
+      - ./FitApp/.env
 volumes:
   postgres_data:

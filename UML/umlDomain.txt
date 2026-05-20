@@ -8,6 +8,8 @@ package "Entities" {
         + decimal Height
         + int Age
         + string Gender
+        + decimal TargetWeight
+        + decimal ActivityMultiplier
     }
 
     class MealLog {
@@ -43,6 +45,30 @@ package "Entities" {
         + DateTime Date
         + decimal Weight
         + decimal BodyFatPercentage
+        + decimal Waist
+        + decimal Hips 
+        + decimal Notes
+    }
+
+    ' --- NOWE KLASY AI ---
+    class MealPlan {
+        + Guid Id
+        + Guid UserId
+        + string Prompt
+        + DateTime CreatedAt
+    }
+
+    class MealPlanItem {
+        + Guid Id
+        + Guid MealPlanId
+        + string MealType
+        + string ProductName
+        + decimal Grams
+        + decimal Calories
+        + decimal Proteins
+        + decimal Carbs
+        + decimal Fats
+        + Guid? FoodProductId
     }
 }
 
@@ -89,6 +115,11 @@ User "1" *-- "0..*" BodyMeasurement
 User "1" *-- "0..*" MealLog
 MealLog "1" *-- "0..*" MealLogItem
 MealLogItem "0..*" o-- "1" FoodProduct
+
+' --- NOWE RELACJE AI ---
+User "1" *-- "0..*" MealPlan
+MealPlan "1" *-- "0..*" MealPlanItem
+MealPlanItem "0..*" o-- "0..1" FoodProduct
 
 MealLogDomainService --> INutritionCalculationService : uses
 NutritionCalculationService ..> MacroNutrients : creates

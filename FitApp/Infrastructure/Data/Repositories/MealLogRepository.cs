@@ -17,4 +17,16 @@ public class MealLogRepository : GenericRepository<MealLog>, IMealLogRepository
             .ThenInclude(i => i.FoodProduct)
             .FirstOrDefaultAsync(m => m.UserId == userId && m.Date.Date == date.Date);
     }
+
+    public async Task AddMealLogItemAsync(MealLogItem item)
+    {
+        await _context
+            .Set<MealLogItem>()
+            .AddAsync(item);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }

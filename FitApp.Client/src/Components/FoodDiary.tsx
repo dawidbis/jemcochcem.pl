@@ -5,6 +5,7 @@ import type {TargetMacros} from './TdeeCalculator';
 import { api } from '../api';
 import { Button } from "#components/ui/button";
 import { Input } from "#components/ui/input";
+import { AiMealPlanGenerator } from './AiMealPlanGenerator';
 
 export function FoodDiary({ user }: { user: User }) {
   const [diary, setDiary] = useState<DiarySummary | null>(null);
@@ -237,6 +238,13 @@ export function FoodDiary({ user }: { user: User }) {
             </div>
           </div>
         </div>
+      </div>
+      <div className="pt-8 mt-8 border-t border-slate-200">
+        <AiMealPlanGenerator 
+          userId={user.userId} 
+          date={selectedDate} // Podajemy wybraną w kalendarzu datę
+          onAdded={loadDiary} // Po dodaniu, funkcja loadDiary odświeży widok
+        />
       </div>
     </div>
   );
