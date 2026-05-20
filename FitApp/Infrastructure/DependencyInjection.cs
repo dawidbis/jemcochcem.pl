@@ -28,7 +28,7 @@ public static class DependencyInjection
         services.AddScoped<INutritionCalculationService, NutritionCalculationService>();
         services.AddScoped<IMealLogDomainService, MealLogDomainService>();
         services.AddScoped<IMealPlanRepository, MealPlanRepository>();
-
+        services.AddHttpClient<IAiService, AiService>();
         return services;
     }
 }

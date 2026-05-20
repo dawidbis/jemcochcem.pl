@@ -18,8 +18,9 @@ public class AiService : IAiService
     public AiService(HttpClient httpClient, IConfiguration config)
     {
         _httpClient = httpClient;
-        _apiKey = config["Gemini:ApiKey"] ?? throw new Exception("Brak klucza Gemini:ApiKey w konfiguracji!");
-    }
+        _apiKey = config["Gemini:ApiKey"] 
+    ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY") 
+    ?? throw new Exception("Brak klucza API Gemini!");  }
 
     public Task<AiAnalysisResult> AnalyzeMealPhotoAsync(byte[] photoBytes) => throw new NotImplementedException();
 
