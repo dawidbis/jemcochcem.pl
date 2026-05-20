@@ -8,6 +8,8 @@ package "Entities" {
         + decimal Height
         + int Age
         + string Gender
+        + decimal TargetWeight
+        + decimal ActivityMultiplier
     }
 
     class MealLog {
