@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FitApp.Domain.Entities;
 using FitApp.Infrastructure.Interfaces;
+using BCrypt.Net;
 
 // 1. KOMENDA - to co wysyła klient w JSONie
 public class CreateUserCommand : IRequest<Guid>
@@ -36,9 +37,7 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
             Id = Guid.NewGuid(),
             Email = request.Email,
             
-            // TODO: W produkcyjnej aplikacji użyj biblioteki takiej jak BCrypt, aby zahaszować hasło!
-            // np. PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-            PasswordHash = request.Password, 
+            PasswordHash = BCrypt.HashPassword(request.Password),
             
             Weight = request.Weight,
             Height = request.Height,

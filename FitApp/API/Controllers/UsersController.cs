@@ -2,7 +2,7 @@ using FitApp.Application.Features.Users;
 using FitApp.Infrastructure.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-
+using BCrypt.Net;
 namespace FitApp.API.Controllers
 {
     [ApiController]
@@ -37,7 +37,7 @@ namespace FitApp.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var user = await _userRepository.GetByEmailAsync(request.Email);
-            if (user == null || user.PasswordHash != request.Password)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 return Unauthorized(new { Message = "Nieprawidłowy email lub hasło." });
 
             return Ok(new
