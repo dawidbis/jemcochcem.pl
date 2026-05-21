@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FitApp.Infrastructure.Interfaces;
 using FitApp.Domain.Entities;
+using Microsoft.Extensions.Caching.Distributed;
 
 public class AddMealItemCommand : IRequest<Unit>
 {
@@ -24,14 +25,18 @@ public class AddMealItemHandler : IRequestHandler<AddMealItemCommand, Unit>
     // POPRAWKA 1: Używamy INTERFEJSU zamiast konkretnej klasy
     private readonly IMealLogDomainService _mealLogService;
 
-    public AddMealItemHandler(
+    private readonly IDistributedCache _cache;
+
+    public AddMealItemHandler(  
         IMealLogRepository mealLogRepository, 
         IFoodRepository foodRepository, 
-        IMealLogDomainService mealLogService) // <-- Wstrzykujemy interfejs
+        IMealLogDomainService mealLogService,
+        IDistributedCache cache) // <-- Wstrzykujemy interfejs
     {
         _mealLogRepository = mealLogRepository;
         _foodRepository = foodRepository;
         _mealLogService = mealLogService;
+        _cache = cache;
     }
 
     public async Task<Unit> Handle(AddMealItemCommand request, CancellationToken ct)
@@ -70,6 +75,8 @@ public class AddMealItemHandler : IRequestHandler<AddMealItemCommand, Unit>
             // tylko wywołuje _context.Entry(entity).State = EntityState.Modified;
             await _mealLogRepository.UpdateAsync(log);
         }
+        string cacheKey = $"diary:{request.UserId}:{request.Date:yyyy-MM-dd}";
+        await _cache.RemoveAsync(cacheKey, ct);
         return Unit.Value;
     }
 }

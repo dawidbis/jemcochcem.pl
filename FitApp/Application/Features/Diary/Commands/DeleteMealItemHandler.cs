@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FitApp.Infrastructure.Interfaces;
 using FitApp.Domain.Interfaces;
+using Microsoft.Extensions.Caching.Distributed;
 
 // Komenda potrzebuje: Kto usuwa, z jakiego dnia i ID konkretnego posiłku
 public record DeleteMealItemCommand(Guid UserId, DateTime Date, Guid ItemId) : IRequest<Unit>;
@@ -16,12 +17,16 @@ public class DeleteMealItemHandler : IRequestHandler<DeleteMealItemCommand, Unit
     private readonly IMealLogRepository _mealLogRepository;
     private readonly IMealLogDomainService _mealLogService;
 
+    private readonly IDistributedCache _cache;
+
     public DeleteMealItemHandler(
         IMealLogRepository mealLogRepository, 
-        IMealLogDomainService mealLogService)
+        IMealLogDomainService mealLogService,
+        IDistributedCache cache)
     {
         _mealLogRepository = mealLogRepository;
         _mealLogService = mealLogService;
+        _cache = cache;
     }
 
     public async Task<Unit> Handle(DeleteMealItemCommand request, CancellationToken ct)
@@ -42,7 +47,8 @@ public class DeleteMealItemHandler : IRequestHandler<DeleteMealItemCommand, Unit
 
         // 5. Zapisujemy zmiany do bazy
         await _mealLogRepository.UpdateAsync(log);
-
+        string cacheKey = $"diary:{request.UserId}:{request.Date:yyyy-MM-dd}";
+        await _cache.RemoveAsync(cacheKey, ct);
         return Unit.Value;
     }
 }
