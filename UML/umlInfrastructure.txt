@@ -9,9 +9,14 @@ package "Interfaces (DAL)" {
         + Remove(T entity) void
     }
 
-    interface IMealLogRepository
     interface IUserRepository
     interface IFoodRepository
+    
+    interface IMealLogRepository {
+        + GetByDateAsync(Guid userId, DateTime date) Task<MealLog?>
+        + UpdateAsync(MealLog log) Task
+    }
+
     interface IBodyMeasurementRepository {
         + GetUserHistoryAsync(Guid userId) Task<IEnumerable<BodyMeasurement>>
         + GetLatestAsync(Guid userId) Task<BodyMeasurement?>
@@ -21,7 +26,6 @@ package "Interfaces (DAL)" {
         + GetItemByIdAsync(Guid id) Task<MealPlanItem?>
     }
 
-    ' --- NOWY INTERFEJS DLA MODUŁU WODY ---
     interface IWaterLogRepository {
         + GetByDateAsync(Guid userId, DateTime date) Task<WaterLog?>
         + AddAsync(WaterLog waterLog) Task
@@ -84,7 +88,6 @@ package "Repositories (Infrastructure)" {
         + GetItemByIdAsync(Guid id) Task<MealPlanItem?>
     }
 
-    ' --- NOWA KLASA IMPLEMENTACJI REPOZYTORIUM WODY ---
     class WaterLogRepository {
         + WaterLogRepository(AppDbContext context)
         + GetByDateAsync(Guid userId, DateTime date) Task<WaterLog?>
@@ -119,27 +122,32 @@ class AppDbContext {
     + DbSet<BodyMeasurement> BodyMeasurements
     + DbSet<MealPlan> MealPlans
     + DbSet<MealPlanItem> MealPlanItems
-    ' --- ZAKTUALIZOWANA KOLEKCJA DB SET O TABELĘ WODY ---
     + DbSet<WaterLog> WaterLogs
     + SaveChangesAsync(CancellationToken ct) Task<int>
 }
 
-' Relationships
-IGenericRepository <|.. GenericRepository
+' Relacje dziedziczenia interfejsów specyficznych po bazowym (Rozwiązanie błędu)
+IGenericRepository <|-- IUserRepository
+IGenericRepository <|-- IFoodRepository
+IGenericRepository <|-- IMealLogRepository
+IGenericRepository <|-- IBodyMeasurementRepository
+IGenericRepository <|-- IMealPlanRepository
+IGenericRepository <|-- IWaterLogRepository
+
+' Relacje dziedziczenia klas repozytoriów po klasie bazowej
 GenericRepository <|-- MealLogRepository
 GenericRepository <|-- UserRepository
 GenericRepository <|-- FoodRepository
 GenericRepository <|-- BodyMeasurementRepository
 GenericRepository <|-- MealPlanRepository
-' --- REPOZYTORIUM WODY DZIEDZICZY PO BAZOWYCH OPERACJACH ---
 GenericRepository <|-- WaterLogRepository
 
+' Realizacja interfejsów przez konkretne klasy
 IMealLogRepository <|.. MealLogRepository
 IUserRepository <|.. UserRepository
 IFoodRepository <|.. FoodRepository
 IBodyMeasurementRepository <|.. BodyMeasurementRepository
 IMealPlanRepository <|.. MealPlanRepository
-' --- IMPLEMENTACJA KONTRAKTU REPOZYTORIUM WODY ---
 IWaterLogRepository <|.. WaterLogRepository
 
 IAiService <|.. GeminiAiService
