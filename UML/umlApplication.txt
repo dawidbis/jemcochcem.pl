@@ -1,7 +1,7 @@
 @startuml
+title FitApp - Pełna Warstwa Aplikacji (DTOs, Interfaces & CQRS)
 
 package "Application.Interfaces" {
-    ' --- ZMIENIONE NA IAiService ---
     interface IAiService {
         + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
         + AskCoachAsync(string prompt) Task<string>
@@ -46,7 +46,6 @@ package "Application.DTOs" {
     class UserDto
     class MeasurementDto
 
-    ' --- NOWE DTO AI ---
     class AiMealPlanItemDto {
         + string MealType
         + string ProductName
@@ -55,6 +54,14 @@ package "Application.DTOs" {
         + decimal Proteins
         + decimal Carbs
         + decimal Fats
+    }
+
+    ' --- NOWE DTO WODY ---
+    class WaterStatusDto #AliceBlue-LightBlue {
+        + int CurrentAmountMl
+        + int TargetAmountMl
+        + bool IsExtraHydrationRequired
+        + string AlertMessage
     }
 }
 
@@ -67,19 +74,14 @@ package "Application.Features" {
             + decimal Grams
         }
         class AddMealItemHandler {
-            - IMealLogRepository _mealLogRepository
-            - IFoodRepository _foodRepository
-            - MealLogDomainService _mealLogService
-            + Handle(AddMealItemCommand request, ...) Task<Unit>
+            + Handle(AddMealItemCommand request) Task<Unit>
         }
-
         class GetDailyDiaryQuery {
             + Guid UserId
             + DateTime Date
         }
         class GetDailyDiaryHandler {
-            - IMealLogRepository _mealLogRepository
-            + Handle(GetDailyDiaryQuery request, ...) Task<DiaryDto>
+            + Handle(GetDailyDiaryQuery request) Task<DiaryDto>
         }
     }
 
@@ -89,60 +91,72 @@ package "Application.Features" {
             + decimal ActivityLevel
         }
         class CalculateTdeeHandler {
-            - IUserRepository _userRepository
-            - TdeeCalculationService _tdeeService
-            + Handle(CalculateTdeeCommand request, ...) Task<int>
+            + Handle(CalculateTdeeCommand request) Task<int>
         }
     }
 
-    ' --- NOWE FEATURES AI ---
     package "AI & MealPlans" {
         class GenerateMealPlanCommand {
             + Guid UserId
             + string Prompt
         }
         class GenerateMealPlanCommandHandler {
-            - IAiService _aiService
-            - IMealPlanRepository _repository
-            + Handle(GenerateMealPlanCommand request, ...) Task<Guid>
+            + Handle(GenerateMealPlanCommand request) Task<Guid>
         }
-
         class AddAiMealToDiaryCommand {
             + Guid UserId
             + Guid MealPlanItemId
             + DateTime Date
         }
         class AddAiMealToDiaryCommandHandler {
-            - IMealPlanRepository _mealPlanRepo
-            - IFoodRepository _foodRepo
-            - IMealLogRepository _mealLogRepo
-            + Handle(AddAiMealToDiaryCommand request, ...) Task<Guid>
+            + Handle(AddAiMealToDiaryCommand request) Task<Guid>
+        }
+    }
+
+    ' --- NOWA PACZKA TRANSAKCYJNA WODY ---
+    package "Water" #AliceBlue-LightBlue {
+        class LogWaterIntakeCommand {
+            + Guid UserId
+            + DateTime Date
+            + int AmountMl
+        }
+        class LogWaterIntakeCommandHandler {
+            - IWaterLogRepository _waterLogRepository
+            + Handle(LogWaterIntakeCommand request) Task<Unit>
+        }
+        class GetWaterStatusQuery {
+            + Guid UserId
+            + DateTime Date
+        }
+        class GetWaterStatusQueryHandler {
+            - IWaterLogRepository _waterLogRepository
+            - IMealLogRepository _mealLogRepository
+            - IBodyMeasurementRepository _measurementRepository
+            + Handle(GetWaterStatusQuery request) Task<WaterStatusDto>
         }
     }
 }
 
-' Relationships
+' Relacje MediatR (CQRS)
 AddMealItemHandler ..> AddMealItemCommand : handles
 GetDailyDiaryHandler ..> GetDailyDiaryQuery : handles
 CalculateTdeeHandler ..> CalculateTdeeCommand : handles
-
-' --- RELACJE NOWYCH HANDLERÓW ---
 GenerateMealPlanCommandHandler ..> GenerateMealPlanCommand : handles
 AddAiMealToDiaryCommandHandler ..> AddAiMealToDiaryCommand : handles
-GenerateMealPlanCommandHandler --> IAiService : uses
-GenerateMealPlanCommandHandler ..> AiMealPlanItemDto : parses
+LogWaterIntakeCommandHandler ..> LogWaterIntakeCommand : handles
+GetWaterStatusQueryHandler ..> GetWaterStatusQuery : handles
 
-GetDailyDiaryHandler ..> DiaryDto : returns
+' Relacje struktur DTO
 DiaryDto *-- MealLogItemDto
 MealLogItemDto *-- MacroNutrientsDto
+GenerateMealPlanCommandHandler ..> AiMealPlanItemDto : parses
+GetDailyDiaryHandler ..> DiaryDto : returns
+GetWaterStatusQueryHandler ..> WaterStatusDto : returns
 
-' External Service usage (logical)
-AddMealItemHandler --> "Domain.Interfaces" : uses IMealLogRepository
-AddMealItemHandler --> "Domain.Services" : uses MealLogDomainService
-CalculateTdeeHandler --> "Domain.Services" : uses TdeeCalculationService
-
-' --- ZALEŻNOŚCI AI OD REPOZYTORIÓW ---
-GenerateMealPlanCommandHandler --> "Domain.Interfaces" : uses IMealPlanRepository
-AddAiMealToDiaryCommandHandler --> "Domain.Interfaces" : uses IMealPlanRepository, IFoodRepository, IMealLogRepository
+' Wstrzykiwanie repozytoriów domenowych przez konstruktory
+Diet --> "Domain.Interfaces" : uses IMealLogRepository, IFoodRepository
+Profile --> "Domain.Services" : uses TdeeCalculationService
+"AI & MealPlans" --> "Domain.Interfaces" : uses IMealPlanRepository
+Water --> "Domain.Interfaces" : uses IWaterLogRepository, IMealLogRepository, IBodyMeasurementRepository
 
 @enduml
