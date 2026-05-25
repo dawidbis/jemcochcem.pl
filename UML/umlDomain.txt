@@ -50,7 +50,6 @@ package "Entities" {
         + decimal Notes
     }
 
-    ' --- NOWE KLASY AI ---
     class MealPlan {
         + Guid Id
         + Guid UserId
@@ -69,6 +68,14 @@ package "Entities" {
         + decimal Carbs
         + decimal Fats
         + Guid? FoodProductId
+    }
+
+    ' --- NOWA ENCJA DOMENOWA: SMART WATER TRACKER ---
+    class WaterLog {
+        + Guid Id
+        + Guid UserId
+        + DateTime Date
+        + int AmountMl
     }
 }
 
@@ -90,6 +97,14 @@ package "DomainInterfaces" {
         + AddItemToLog(log: MealLog, item: MealLogItem): void
         + RecalculateLogTotals(log: MealLog): void
     }
+
+    ' --- NOWY INTERFEJS REPOZYTORIUM W WARSTWIE DOMENY ---
+    interface IWaterLogRepository {
+        + GetByDateAsync(userId: Guid, date: DateTime): Task<WaterLog>
+        + AddAsync(waterLog: WaterLog): Task
+        + UpdateAsync(waterLog: WaterLog): Task
+        + SaveChangesAsync(): Task
+    }
 }
 
 package "DomainServices" {
@@ -110,16 +125,18 @@ package "DomainServices" {
     }
 }
 
-' Relationships
+' Relacje obiektów
 User "1" *-- "0..*" BodyMeasurement
 User "1" *-- "0..*" MealLog
 MealLog "1" *-- "0..*" MealLogItem
 MealLogItem "0..*" o-- "1" FoodProduct
 
-' --- NOWE RELACJE AI ---
 User "1" *-- "0..*" MealPlan
 MealPlan "1" *-- "0..*" MealPlanItem
 MealPlanItem "0..*" o-- "0..1" FoodProduct
+
+' --- NOWA RELACJA DOMENOWA ---
+User "1" *-- "0..*" WaterLog
 
 MealLogDomainService --> INutritionCalculationService : uses
 NutritionCalculationService ..> MacroNutrients : creates
