@@ -3,14 +3,21 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, LineChart, Line, Legend,
 } from 'recharts';
-import { CalendarDays, Flame, TrendingUp } from 'lucide-react';
-import type { User, DiarySummary } from '../types';
+// Dodaliśmy ikonę Droplet dla reprezentacji wody
+import { CalendarDays, Flame, TrendingUp, Droplet } from 'lucide-react';
+import type { User, DiarySummary, WaterStatusDto } from '../types';
 import { api } from '../api';
 
 interface Props { user: User; }
 
 const MONTH_NAMES = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
 const DAY_NAMES = ['Pn','Wt','Śr','Cz','Pt','Sb','Nd'];
+
+// Interfejs pomocniczy łączący jedzenie i wodę w cache stanowym
+interface DayData {
+  diary: DiarySummary | null;
+  water: WaterStatusDto | null;
+}
 
 export function DietCalendar({ user }: Props) {
   const today = new Date();
@@ -19,7 +26,10 @@ export function DietCalendar({ user }: Props) {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedDiary, setSelectedDiary] = useState<DiarySummary | null>(null);
-  const [monthData, setMonthData] = useState<Record<string, DiarySummary>>({});
+  const [selectedWater, setSelectedWater] = useState<WaterStatusDto | null>(null);
+  
+  // Przebudowany stan z obsługą agregacji jedzenia i wody
+  const [monthData, setMonthData] = useState<Record<string, DayData>>({});
   const [loading, setLoading] = useState(false);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -38,19 +48,27 @@ export function DietCalendar({ user }: Props) {
 
   const isNextDisabled = viewYear > today.getFullYear() || (viewYear === today.getFullYear() && viewMonth >= today.getMonth());
 
-  // Load all days for this month
+  // Równoległe ładowanie danych o posiłkach oraz wodzie dla całego miesiąca
   useEffect(() => {
     const loadMonth = async () => {
       setLoading(true);
-      const data: Record<string, DiarySummary> = {};
+      const data: Record<string, DayData> = {};
       const maxDay = viewYear === today.getFullYear() && viewMonth === today.getMonth()
         ? today.getDate() : daysInMonth;
 
       for (let d = 1; d <= maxDay; d++) {
         const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         try {
-          const diary = await api.loadDiary(dateStr, user.userId);
-          if (diary && diary.totalCalories > 0) data[dateStr] = diary;
+          // Pobieramy dane z obu pionów biznesowych równolegle
+          const [diary, water] = await Promise.all([
+            api.loadDiary(dateStr, user.userId),
+            api.getWaterStatus(user.userId, dateStr)
+          ]);
+
+          // Zapisujemy dzień w historii jeśli użytkownik cokolwiek zjadł lub wypił
+          if ((diary && diary.totalCalories > 0) || (water && water.currentAmountMl > 0)) {
+            data[dateStr] = { diary, water };
+          }
         } catch { /* skip */ }
       }
       setMonthData(data);
@@ -59,10 +77,15 @@ export function DietCalendar({ user }: Props) {
     loadMonth();
   }, [viewMonth, viewYear, user.userId]);
 
-  // Load selected day detail
+  // Ładowanie szczegółów wybranego dnia (Jedzenie + Woda)
   useEffect(() => {
-    if (!selectedDate) { setSelectedDiary(null); return; }
+    if (!selectedDate) { 
+      setSelectedDiary(null); 
+      setSelectedWater(null); 
+      return; 
+    }
     api.loadDiary(selectedDate, user.userId).then((d: any) => setSelectedDiary(d));
+    api.getWaterStatus(user.userId, selectedDate).then((w: any) => setSelectedWater(w));
   }, [selectedDate]);
 
   const selectDay = (day: number) => {
@@ -70,23 +93,29 @@ export function DietCalendar({ user }: Props) {
     if (d <= todayStr) setSelectedDate(d === selectedDate ? null : d);
   };
 
-  // Chart data — daily kcal for whole month
+  // Przygotowanie danych do 3 wykresów analitycznych
   const chartData = Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
     const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const entry = monthData[dateStr];
     return {
       day: String(day),
-      kcal: entry?.totalCalories || 0,
-      białko: entry?.totalProtein || 0,
-      węgle: entry?.totalCarbs || 0,
-      tłuszcz: entry?.totalFats || 0,
+      kcal: entry?.diary?.totalCalories || 0,
+      białko: entry?.diary?.totalProtein || 0,
+      węgle: entry?.diary?.totalCarbs || 0,
+      tłuszcz: entry?.diary?.totalFats || 0,
+      woda: entry?.water?.currentAmountMl || 0, // Nowa kolumna dla wykresu wody
     };
   });
 
-  const totalMonthKcal = Object.values(monthData).reduce((s, d) => s + d.totalCalories, 0);
+  // Obliczenia statystyk globalnych
+  const totalMonthKcal = Object.values(monthData).reduce((s, d) => s + (d.diary?.totalCalories || 0), 0);
   const daysWithData = Object.keys(monthData).length;
   const avgKcal = daysWithData > 0 ? Math.round(totalMonthKcal / daysWithData) : 0;
+
+  // Nowe obliczenia dla średniej wody
+  const totalMonthWater = Object.values(monthData).reduce((s, d) => s + (d.water?.currentAmountMl || 0), 0);
+  const avgWater = daysWithData > 0 ? Math.round(totalMonthWater / daysWithData) : 0;
 
   const getCalorieColor = (kcal: number) => {
     if (kcal === 0) return '';
@@ -107,8 +136,8 @@ export function DietCalendar({ user }: Props) {
         <p className="text-slate-500 text-sm mt-0.5">Przeglądaj historię posiłków i analizuj trendy żywieniowe</p>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Zaktualizowana siatka kart - grid-cols-4 dla pomieszczenia wody */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-slate-500 font-medium">Suma kcal w miesiącu</span>
@@ -129,6 +158,15 @@ export function DietCalendar({ user }: Props) {
             <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600"><CalendarDays className="h-4 w-4" /></div>
           </div>
           <p className="text-2xl font-bold text-slate-900">{daysWithData} / {daysInMonth}</p>
+        </div>
+        
+        {/* NOWY KAFELEK: ŚREDNIE NAWODNIENIE */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-slate-500 font-medium">Średnie nawodnienie</span>
+            <div className="p-2 bg-blue-50 rounded-lg text-blue-500"><Droplet className="h-4 w-4 animate-pulse" /></div>
+          </div>
+          <p className="text-2xl font-bold text-slate-900">{avgWater} <span className="text-sm font-normal text-slate-400">ml/dzień</span></p>
         </div>
       </div>
 
@@ -158,7 +196,8 @@ export function DietCalendar({ user }: Props) {
               const isSelected = dateStr === selectedDate;
               const isToday = dateStr === todayStr;
               const entry = monthData[dateStr];
-              const kcal = entry?.totalCalories || 0;
+              const kcal = entry?.diary?.totalCalories || 0;
+              const waterMl = entry?.water?.currentAmountMl || 0; // Odczytujemy wodę dla tego dnia kalendarzowego
               const colorClass = getCalorieColor(kcal);
 
               return (
@@ -175,8 +214,14 @@ export function DietCalendar({ user }: Props) {
                     ${!isSelected && !isFuture && !colorClass ? 'text-slate-600 hover:bg-slate-50' : ''}
                   `}
                 >
-                  <span>{day}</span>
+                  <span className="text-xs">{day}</span>
                   {kcal > 0 && <span className="text-[9px] font-semibold leading-none">{kcal}</span>}
+                  {/* MAŁA IKONKA KROPELKI JEŚLI ZALOGOWANO WODĘ TEGO DNIA */}
+                  {waterMl > 0 && (
+                    <span className="text-[8px] font-bold text-blue-600 flex items-center gap-px mt-0.5 leading-none">
+                      💧{waterMl}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -188,21 +233,23 @@ export function DietCalendar({ user }: Props) {
         {/* Right side: selected day detail or charts */}
         <div className="space-y-6">
           {/* Selected day detail */}
-          {selectedDate && selectedDiary && (
+          {selectedDate && (selectedDiary || selectedWater) && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="bg-slate-900 text-white p-5">
                 <h3 className="text-lg font-bold">
                   {new Date(selectedDate).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </h3>
-                <div className="flex gap-6 mt-3 text-sm">
-                  <span><strong>{selectedDiary.totalCalories}</strong> kcal</span>
-                  <span className="text-blue-300">B: {selectedDiary.totalProtein}g</span>
-                  <span className="text-amber-300">W: {selectedDiary.totalCarbs}g</span>
-                  <span className="text-rose-300">T: {selectedDiary.totalFats}g</span>
+                <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3 text-sm">
+                  <span><strong>{selectedDiary?.totalCalories || 0}</strong> kcal</span>
+                  <span className="text-blue-300">B: {selectedDiary?.totalProtein || 0}g</span>
+                  <span className="text-amber-300">W: {selectedDiary?.totalCarbs || 0}g</span>
+                  <span className="text-rose-300">T: {selectedDiary?.totalFats || 0}g</span>
+                  {/* DODANY ODPOWIEDNIK WODY W SZCZEGÓŁACH DNIA */}
+                  <span className="text-blue-400 font-semibold">💧 Woda: {selectedWater?.currentAmountMl || 0} ml</span>
                 </div>
               </div>
               <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
-                {selectedDiary.items.length > 0 ? selectedDiary.items.map(item => (
+                {selectedDiary && selectedDiary.items.length > 0 ? selectedDiary.items.map(item => (
                   <div key={item.id} className="px-5 py-3 flex justify-between items-center">
                     <div>
                       <strong className="text-slate-800 text-sm">{item.foodName}</strong>
@@ -226,17 +273,36 @@ export function DietCalendar({ user }: Props) {
               <Flame className="h-4 w-4 text-orange-500" />
               Kalorie dziennie — {MONTH_NAMES[viewMonth]} {viewYear}
             </h3>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={chartData} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#94a3b8' }} interval={1} />
                 <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} />
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 12 }}
-                  formatter={(v: any) => [`${v}`]}
-
+                  formatter={(v: any) => [`${v} kcal`]}
                 />
                 <Bar dataKey="kcal" fill="#f97316" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* NOWY TRZECI WYKRES: NAWODNIENIE TRANSAKCYJNE (SŁUPKOWY) */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <Droplet className="h-4 w-4 text-blue-500" />
+              Spożycie wody dziennie — {MONTH_NAMES[viewMonth]} {viewYear}
+            </h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartData} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#94a3b8' }} interval={1} />
+                <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickFormatter={(v: any) => `${v}ml`} />
+                <Tooltip
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 12 }}
+                  formatter={(v: any) => [`${v} ml`]}
+                />
+                <Bar dataKey="woda" fill="#3b82f6" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -254,7 +320,7 @@ export function DietCalendar({ user }: Props) {
                 <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickFormatter={(v: any) => `${v}g`} />
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 12 }}
-                    formatter={(v: any) => [`${v}g`]}
+                  formatter={(v: any) => [`${v} g`]}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line type="monotone" dataKey="białko" stroke="#3b82f6" strokeWidth={2} dot={false} connectNulls />

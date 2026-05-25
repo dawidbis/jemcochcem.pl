@@ -55,3 +55,10 @@ export interface AiMealPlan {
   createdAt: string;
   items: AiMealPlanItem[];
 }
+
+export interface WaterStatusDto {
+  currentAmountMl: number;
+  targetAmountMl: number;
+  isExtraHydrationRequired: boolean;
+  alertMessage: string;
+}

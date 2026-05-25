@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
 
     public DbSet<MealPlan> MealPlans { get; set; }
     public DbSet<MealPlanItem> MealPlanItems { get; set; }
+    public DbSet<WaterLog> WaterLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

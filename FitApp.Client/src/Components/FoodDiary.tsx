@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import type { User, DiarySummary, Food, ExternalFood } from '../types';
 import { ManualFoodForm } from './ManualFoodForm';
-import type {TargetMacros} from './TdeeCalculator';
+import type { TargetMacros } from './TdeeCalculator';
 import { api } from '../api';
 import { Button } from "#components/ui/button";
 import { Input } from "#components/ui/input";
 import { AiMealPlanGenerator } from './AiMealPlanGenerator';
+import { WaterTracker } from './WaterTracker';
 
 export function FoodDiary({ user }: { user: User }) {
   const [diary, setDiary] = useState<DiarySummary | null>(null);
@@ -99,45 +100,60 @@ export function FoodDiary({ user }: { user: User }) {
         </div>
       </div>
 
-      {/* Podsumowanie kalorii */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">Kalorie</span>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalCalories || 0} <span className="text-base font-normal text-slate-400">/ {targets?.tdee || '-'}</span></p>
-          {targets?.tdee && diary ? (
-            <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalCalories / targets.tdee) * 100)}%` }} />
-            </div>
-          ) : null}
-        </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Białko</span>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalProtein || 0}<span className="text-base font-normal text-slate-400">g / {targets?.protein || '-'}g</span></p>
-          {targets?.protein && diary ? (
-            <div className="mt-3 h-2 bg-blue-50 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalProtein / targets.protein) * 100)}%` }} />
-            </div>
-          ) : null}
-        </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <span className="text-xs text-amber-600 font-medium uppercase tracking-wider">Węglowodany</span>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalCarbs || 0}<span className="text-base font-normal text-slate-400">g / {targets?.carbs || '-'}g</span></p>
-          {targets?.carbs && diary ? (
-            <div className="mt-3 h-2 bg-amber-50 rounded-full overflow-hidden">
-              <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalCarbs / targets.carbs) * 100)}%` }} />
-            </div>
-          ) : null}
-        </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <span className="text-xs text-rose-600 font-medium uppercase tracking-wider">Tłuszcz</span>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalFats || 0}<span className="text-base font-normal text-slate-400">g / {targets?.fats || '-'}g</span></p>
-          {targets?.fats && diary ? (
-            <div className="mt-3 h-2 bg-rose-50 rounded-full overflow-hidden">
-              <div className="h-full bg-rose-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalFats / targets.fats) * 100)}%` }} />
-            </div>
-          ) : null}
-        </div>
+      {/* Podsumowanie kalorii i makroskładników na osi czasu */}
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+  
+      {/* Kafelek: Kalorie */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">Kalorie</span>
+        <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalCalories || 0} <span className="text-base font-normal text-slate-400">/ {targets?.tdee || '-'}</span></p>
+        {targets?.tdee && diary ? (
+          <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalCalories / targets.tdee) * 100)}%` }} />
       </div>
+        ) : null}
+      </div>
+
+      {/* Kafelek: Białko */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <span className="text-xs text-blue-600 font-medium uppercase tracking-wider">Białko</span>
+        <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalProtein || 0}<span className="text-base font-normal text-slate-400">g / {targets?.protein || '-'}g</span></p>
+        {targets?.protein && diary ? (
+          <div className="mt-3 h-2 bg-blue-50 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalProtein / targets.protein) * 100)}%` }} />
+      </div>
+        ) : null}
+      </div>
+
+      {/* Kafelek: Węglowodany */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <span className="text-xs text-amber-600 font-medium uppercase tracking-wider">Węglowodany</span>
+        <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalCarbs || 0}<span className="text-base font-normal text-slate-400">g / {targets?.carbs || '-'}g</span></p>
+        {targets?.carbs && diary ? (
+          <div className="mt-3 h-2 bg-amber-50 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalCarbs / targets.carbs) * 100)}%` }} />
+      </div>
+        ) : null}
+      </div>
+
+      {/* Kafelek: Tłuszcz */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <span className="text-xs text-rose-600 font-medium uppercase tracking-wider">Tłuszcz</span>
+        <p className="text-2xl font-bold text-slate-900 mt-1">{diary?.totalFats || 0}<span className="text-base font-normal text-slate-400">g / {targets?.fats || '-'}g</span></p>
+        {targets?.fats && diary ? (
+          <div className="mt-3 h-2 bg-rose-50 rounded-full overflow-hidden">
+            <div className="h-full bg-rose-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (diary.totalFats / targets.fats) * 100)}%` }} />
+        </div>
+        ) : null}
+      </div>
+
+      <WaterTracker 
+        key={`${selectedDate}-${diary?.totalProtein}`} 
+        userId={user.userId} 
+        date={selectedDate} 
+      />
+
+</div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
         {/* Lewa: Lista posiłków + wyszukiwarka */}
@@ -242,8 +258,8 @@ export function FoodDiary({ user }: { user: User }) {
       <div className="pt-8 mt-8 border-t border-slate-200">
         <AiMealPlanGenerator 
           userId={user.userId} 
-          date={selectedDate} // Podajemy wybraną w kalendarzu datę
-          onAdded={loadDiary} // Po dodaniu, funkcja loadDiary odświeży widok
+          date={selectedDate} 
+          onAdded={loadDiary} 
         />
       </div>
     </div>

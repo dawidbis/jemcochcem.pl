@@ -11,6 +11,7 @@ using FitApp.Domain.Interfaces;
 using FitApp.Domain.Services;
 using FitApp.Infrastructure.ExternalServices;
 using FitApp.Application.Interfaces;
+using FitApp.Infrastructure.Repositories;
 
 public static class DependencyInjection
 {
@@ -29,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IMealLogDomainService, MealLogDomainService>();
         services.AddScoped<IMealPlanRepository, MealPlanRepository>();
         services.AddHttpClient<IAiService, AiService>();
+        services.AddScoped<IWaterLogRepository, WaterLogRepository>();
         return services;
     }
 }

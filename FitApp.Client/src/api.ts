@@ -1,4 +1,4 @@
-import type { DiarySummary, Food, ExternalFood, Measurement, MeasurementStats, CreateMeasurementPayload, AiMealPlan } from './types';
+import type { DiarySummary, Food, ExternalFood, Measurement, MeasurementStats, CreateMeasurementPayload, AiMealPlan, WaterStatusDto } from './types';
 
 export const api = {
   async loadDiary(date: string, userId: string): Promise<DiarySummary | null> {
@@ -98,5 +98,18 @@ export const api = {
   async getUserMealPlans(userId: string): Promise<AiMealPlan[]> {
     const res = await fetch(`/api/MealPlans?userId=${userId}`);
     return res.ok ? res.json() : [];
+  },
+
+  async getWaterStatus(userId: string, date: string): Promise<WaterStatusDto | null> {
+    const res = await fetch(`/api/Water/status?userId=${userId}&date=${date}`);
+    return res.ok ? res.json() : null;
+  },
+
+  async logWater(payload: { userId: string; date: string; amountMl: number }) {
+    return fetch('/api/Water/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
   }
 };
