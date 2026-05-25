@@ -9,20 +9,30 @@ package "Interfaces (DAL)" {
         + Remove(T entity) void
     }
 
-    interface IMealLogRepository
     interface IUserRepository
     interface IFoodRepository
+    
+    interface IMealLogRepository {
+        + GetByDateAsync(Guid userId, DateTime date) Task<MealLog?>
+        + UpdateAsync(MealLog log) Task
+    }
+
     interface IBodyMeasurementRepository {
         + GetUserHistoryAsync(Guid userId) Task<IEnumerable<BodyMeasurement>>
         + GetLatestAsync(Guid userId) Task<BodyMeasurement?>
     }
 
-    ' --- NOWY INTERFEJS REPOZYTORIUM AI ---
     interface IMealPlanRepository {
         + GetItemByIdAsync(Guid id) Task<MealPlanItem?>
     }
 
-    ' --- ZMIENIONE NA IAiService ---
+    interface IWaterLogRepository {
+        + GetByDateAsync(Guid userId, DateTime date) Task<WaterLog?>
+        + AddAsync(WaterLog waterLog) Task
+        + UpdateAsync(WaterLog waterLog) Task
+        + SaveChangesAsync() Task
+    }
+
     interface IAiService {
         + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
         + AskCoachAsync(string prompt) Task<string>
@@ -54,7 +64,6 @@ package "Repositories (Infrastructure)" {
         + MealLogRepository(AppDbContext context)
         + GetByDateAsync(Guid userId, DateTime date) Task<MealLog?>
         + UpdateAsync(MealLog log) Task
-        ' --- DODANE DZISIAJ METODY ---
         + AddMealLogItemAsync(MealLogItem item) Task
         + SaveChangesAsync() Task
     }
@@ -74,15 +83,21 @@ package "Repositories (Infrastructure)" {
         + GetLatestAsync(Guid userId) Task<BodyMeasurement?>
     }
 
-    ' --- NOWE REPOZYTORIUM AI ---
     class MealPlanRepository {
         + MealPlanRepository(AppDbContext context)
         + GetItemByIdAsync(Guid id) Task<MealPlanItem?>
     }
+
+    class WaterLogRepository {
+        + WaterLogRepository(AppDbContext context)
+        + GetByDateAsync(Guid userId, DateTime date) Task<WaterLog?>
+        + AddAsync(WaterLog waterLog) Task
+        + UpdateAsync(WaterLog waterLog) Task
+        + SaveChangesAsync() Task
+    }
 }
 
 package "External Services" {
-    ' --- ZMIENIONE NA GeminiAiService ---
     class GeminiAiService {
         - HttpClient _httpClient
         + AnalyzeMealPhotoAsync(byte[] photoBytes) Task<AiAnalysisResult>
@@ -105,29 +120,36 @@ class AppDbContext {
     + DbSet<MealLog> MealLogs
     + DbSet<FoodProduct> FoodProducts
     + DbSet<BodyMeasurement> BodyMeasurements
-    ' --- NOWE TABELE AI ---
     + DbSet<MealPlan> MealPlans
     + DbSet<MealPlanItem> MealPlanItems
+    + DbSet<WaterLog> WaterLogs
     + SaveChangesAsync(CancellationToken ct) Task<int>
 }
 
-' Relationships
-IGenericRepository <|.. GenericRepository
+' Relacje dziedziczenia interfejsów specyficznych po bazowym (Rozwiązanie błędu)
+IGenericRepository <|-- IUserRepository
+IGenericRepository <|-- IFoodRepository
+IGenericRepository <|-- IMealLogRepository
+IGenericRepository <|-- IBodyMeasurementRepository
+IGenericRepository <|-- IMealPlanRepository
+IGenericRepository <|-- IWaterLogRepository
+
+' Relacje dziedziczenia klas repozytoriów po klasie bazowej
 GenericRepository <|-- MealLogRepository
 GenericRepository <|-- UserRepository
 GenericRepository <|-- FoodRepository
 GenericRepository <|-- BodyMeasurementRepository
-' --- NOWA RELACJA ---
 GenericRepository <|-- MealPlanRepository
+GenericRepository <|-- WaterLogRepository
 
+' Realizacja interfejsów przez konkretne klasy
 IMealLogRepository <|.. MealLogRepository
 IUserRepository <|.. UserRepository
 IFoodRepository <|.. FoodRepository
 IBodyMeasurementRepository <|.. BodyMeasurementRepository
-' --- NOWA RELACJA ---
 IMealPlanRepository <|.. MealPlanRepository
+IWaterLogRepository <|.. WaterLogRepository
 
-' --- ZMIENIONA RELACJA ---
 IAiService <|.. GeminiAiService
 IOffApiClient <|.. OpenFoodFactsClient
 IRedisCache <|.. RedisCacheService
