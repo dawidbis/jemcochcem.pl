@@ -10,6 +10,9 @@ public class User
     public string Gender { get; set; } = string.Empty;
     public decimal? TargetWeight { get; set; }
     public decimal ActivityMultiplier { get; set; } = 1.55m;
+    public int CurrentStreak { get; set; } = 0;
+    public int LongestStreak { get; set; } = 0;
+    public DateTime? LastStreakUpdate { get; set; }
     public ICollection<BodyMeasurement> BodyMeasurements { get; set; } = new List<BodyMeasurement>();
     public ICollection<MealLog> MealLogs { get; set; } = new List<MealLog>();
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FitApp.Infrastructure.Interfaces;
 using FitApp.Domain.Entities;
 using Microsoft.Extensions.Caching.Distributed;
+using FitApp.Application.Features.Profile;
 
 public class AddMealItemCommand : IRequest<Unit>
 {
@@ -21,26 +22,52 @@ public class AddMealItemHandler : IRequestHandler<AddMealItemCommand, Unit>
 {
     private readonly IMealLogRepository _mealLogRepository;
     private readonly IFoodRepository _foodRepository;
+      private readonly IUserRepository _userRepository;
     
     // POPRAWKA 1: Używamy INTERFEJSU zamiast konkretnej klasy
     private readonly IMealLogDomainService _mealLogService;
 
     private readonly IDistributedCache _cache;
+    private readonly IDietStreakService _streakService;
+
+    private readonly IMediator _mediator;
 
     public AddMealItemHandler(  
         IMealLogRepository mealLogRepository, 
         IFoodRepository foodRepository, 
         IMealLogDomainService mealLogService,
-        IDistributedCache cache) // <-- Wstrzykujemy interfejs
+        IDistributedCache cache,
+        IDietStreakService streakService,
+        IUserRepository userRepository,
+        IMediator mediator)
     {
         _mealLogRepository = mealLogRepository;
         _foodRepository = foodRepository;
+        _userRepository = userRepository;
         _mealLogService = mealLogService;
         _cache = cache;
+        _streakService = streakService;
+        _mediator = mediator;
     }
 
     public async Task<Unit> Handle(AddMealItemCommand request, CancellationToken ct)
     {
+        var user = await _userRepository.GetByIdAsync(request.UserId);
+        var targetCalories = await _mediator.Send(new CalculateTdeeCommand(user.Id,user.ActivityMultiplier));
+        if (user == null) throw new KeyNotFoundException("User not found.");
+
+        var targetDate = request.Date.Date;
+
+        if (user.LastStreakUpdate.HasValue)
+        {
+            var daysSinceLastUpdate = (targetDate - user.LastStreakUpdate.Value.Date).Days;
+            
+            // Jeśli minęła dziura w dniach, wymuszamy wygaszenie starego streaka wartością 0
+            if (daysSinceLastUpdate > 1)
+            {
+                _streakService.CalculateStreak(user, consumedCalories: 0, targetCalories, targetDate.AddDays(-1));
+            }
+        }
         // POPRAWKA 2: Bezpieczne sprawdzanie, czy tworzymy nowy dziennik
         bool isNewLog = false;
         var log = await _mealLogRepository.GetByDateAsync(request.UserId, request.Date);

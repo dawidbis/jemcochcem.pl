@@ -44,6 +44,8 @@ namespace FitApp.API.Controllers
             {
                 UserId = user.Id,
                 UserEmail = user.Email,
+                user.CurrentStreak,
+                user.LongestStreak,
                 Message = "Zalogowano pomyślnie!"
             });
         }
@@ -53,7 +55,11 @@ namespace FitApp.API.Controllers
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return NotFound();
-
+            var currentStreak = user.CurrentStreak;
+            if (user.LastStreakUpdate.HasValue && (DateTime.UtcNow.Date - user.LastStreakUpdate.Value.Date).Days > 1)
+            {
+                currentStreak = 0;
+            }
             return Ok(new
             {
                 user.Id,
@@ -63,7 +69,10 @@ namespace FitApp.API.Controllers
                 user.Age,
                 user.Gender,
                 user.TargetWeight,
-                user.ActivityMultiplier
+                user.ActivityMultiplier,
+                CurrentStreak = currentStreak,
+                user.LongestStreak,
+                
             });
         }
 

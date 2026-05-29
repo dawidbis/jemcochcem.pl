@@ -7,10 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using FitApp.Infrastructure.Interfaces;
 
-public class CalculateTdeeCommand : IRequest<int>
+public record CalculateTdeeCommand(Guid UserId,decimal ActivityLevel) : IRequest<int>
 {
-    public Guid UserId { get; set; }
-    public decimal ActivityLevel { get; set; }
 }
 
 public class CalculateTdeeHandler : IRequestHandler<CalculateTdeeCommand, int>
