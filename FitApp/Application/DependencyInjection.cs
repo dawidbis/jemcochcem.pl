@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<NutritionCalculationService>();
         services.AddScoped<MealLogDomainService>();
         services.AddScoped<TdeeCalculationService>();
+        services.AddScoped<IDietStreakService, DietStreakService>();
         services.AddHttpClient<IOffApiClient, OpenFoodFactsClient>();
         // W pliku DependencyInjection.cs lub Program.cs
         services.AddHttpClient<IAiService, AiService>();
