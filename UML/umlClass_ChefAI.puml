@@ -1,0 +1,48 @@
+@startuml
+skinparam class {
+    BackgroundColor white
+    ArrowColor #333333
+    BorderColor #4F46E5
+}
+
+package "FitApp.API.Controllers" {
+    class AiMealController {
+        - _mediator: IMediator
+        + AiMealController(mediator: IMediator)
+        + GenerateMealAi(protein: double, carbs: double, fat: double): Task<IActionResult>
+    }
+}
+
+package "FitApp.Application.Features.Diet" {
+    class GetGeminiMealQuery {
+        + Protein: double
+        + Carbs: double
+        + Fat: double
+    }
+
+    class GetGeminiMealQueryHandler {
+        - _geminiService: IGeminiService
+        + GetGeminiMealQueryHandler(geminiService: IGeminiService)
+        + Handle(request: GetGeminiMealQuery, cancellationToken: CancellationToken): Task<object>
+    }
+}
+
+package "FitApp.Domain.Services" {
+    interface IGeminiService {
+        + GenerateAiMealAsync(protein: double, carbs: double, fat: double): Task<object>
+    }
+
+    class GeminiService {
+        - _httpClient: HttpClient
+        + GeminiService(httpClient: HttpClient)
+        + GenerateAiMealAsync(protein: double, carbs: double, fat: double): Task<object>
+    }
+}
+
+AiMealController ..> GetGeminiMealQuery : tworzy
+AiMealController --> "1" IMediator : używa
+GetGeminiMealQueryHandler ..|> IRequestHandler
+GetGeminiMealQueryHandler --> "1" IGeminiService : używa
+GeminiService ..|> IGeminiService
+
+@enduml

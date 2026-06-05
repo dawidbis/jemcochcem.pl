@@ -1,0 +1,55 @@
+@startuml
+skinparam style strictuml
+skinparam participant {
+    BackgroundColor white
+    BorderColor #4F46E5
+}
+
+actor Użytkownik as User
+participant "AiMealMatcher.tsx\n(React Frontend)" as UI
+participant "AiMealController" as Controller
+participant "MediatR" as Mediator
+participant "GetGeminiMealQueryHandler" as Handler
+participant "GeminiService" as Service
+database "Google Gemini API" as Google
+
+User -> UI: Wprowadza makroskładniki i klika "Generuj"
+activate UI
+
+UI -> Controller: GET /api/AiMeal/generate-ai?protein=X&carbs=Y&fat=Z
+activate Controller
+
+Controller -> Mediator: Send(new GetGeminiMealQuery(...))
+activate Mediator
+
+Mediator -> Handler: Handle(query)
+activate Handler
+
+Handler -> Service: GenerateAiMealAsync(protein, carbs, fat)
+activate Service
+
+Service -> Service: Odczyt i sanityzacja klucza z .env
+Service -> Service: Zbudowanie rygorystycznego promptu JSON
+
+Service -> Google: HTTP POST /generateContent
+activate Google
+Google --> Service: Surowa odpowiedź JSON
+deactivate Google
+
+Service -> Service: Czyszczenie z markdown i deserializacja
+Service --> Handler: Zwraca obiekt przepisu (mealName, ingredients, steps)
+deactivate Service
+
+Handler --> Mediator: Zwraca wynik
+deactivate Handler
+
+Mediator --> Controller: Zwraca wynik
+deactivate Mediator
+
+Controller --> UI: HTTP 200 OK (JSON)
+deactivate Controller
+
+UI -> UI: Parsowanie danych i renderowanie interfejsu
+UI --> User: Wyświetla kafelki z przepisem Chef AI
+deactivate UI
+@enduml

@@ -3,6 +3,7 @@ using FitApp.Application;
 using FitApp.Infrastructure;
 using FitApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using FitApp.Domain.Services;
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// Dodaj to tam, gdzie rejestrujesz serwisy
+builder.Services.AddHttpClient<IGeminiService, GeminiService>();
 builder.Services.AddScoped<FitApp.Domain.Services.IAiMealService, FitApp.Domain.Services.AiMealService>();
 builder.Services.AddCors(options => {
     options.AddPolicy("VitePolicy", policy => {
