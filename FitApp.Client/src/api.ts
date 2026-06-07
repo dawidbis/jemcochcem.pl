@@ -41,6 +41,10 @@ export const api = {
     const res = await fetch(`/api/users/${userId}/macros`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(multiplier) });
     return res.ok ? res.json() : null;
   },
+  async calculateMicros(userId: string) {
+    const res = await fetch(`/api/users/${userId}/micros`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    return res.ok ? res.json() : null;
+  },
 
   // Measurements
   async getMeasurements(userId: string): Promise<Measurement[]> {

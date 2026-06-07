@@ -18,6 +18,24 @@ public class NutritionCalculationService : INutritionCalculationService
             grams * fatsPer100g / 100m
         );
 
+    // 2b. Mikroskładniki dla konkretnej porcji (analogicznie do makro – liczymy proporcjonalnie do gramatury)
+    public MicroNutrients CalculateItemMicros(
+        decimal grams,
+        decimal fiberPer100g,
+        decimal sugarsPer100g,
+        decimal saturatedFatPer100g,
+        decimal sodiumPer100g,
+        decimal calciumPer100g,
+        decimal ironPer100g) =>
+        new MicroNutrients(
+            grams * fiberPer100g / 100m,
+            grams * sugarsPer100g / 100m,
+            grams * saturatedFatPer100g / 100m,
+            grams * sodiumPer100g / 100m,
+            grams * calciumPer100g / 100m,
+            grams * ironPer100g / 100m
+        );
+
     // 3. NOWA METODA: Do liczenia dziennego zapotrzebowania (celu) dla użytkownika
     public MacroNutrients CalculateDailyMacroGoals(int tdee, decimal bodyWeight)
     {
@@ -33,8 +51,34 @@ public class NutritionCalculationService : INutritionCalculationService
         // Zabezpieczenie przed wartością ujemną przy ekstremalnych kalorycznościach
         if (carbsGrams < 0) carbsGrams = 0;
 
-        // Zakładam, że konstruktor MacroNutrients ma kolejność: (Białko, Węglowodany, Tłuszcze) 
+        // Zakładam, że konstruktor MacroNutrients ma kolejność: (Białko, Węglowodany, Tłuszcze)
         // - patrząc na Twojego returna w CalculateItemMacros
         return new MacroNutrients(proteinGrams, carbsGrams, fatGrams);
+    }
+
+    // 4. NOWA METODA: Dzienne cele dla mikroskładników (zalecane spożycie / wartości referencyjne).
+    // Wartości oparte na ogólnych zaleceniach dla dorosłych (m.in. EU NRV / WHO).
+    // Żelazo zależy od płci (kobiety mają wyższe zapotrzebowanie ze względu na cykl menstruacyjny).
+    public MicroNutrients CalculateDailyMicroGoals(string gender)
+    {
+        bool isFemale = !string.IsNullOrWhiteSpace(gender) &&
+                        (gender.Trim().StartsWith("f", StringComparison.OrdinalIgnoreCase) || // female / f
+                         gender.Trim().StartsWith("k", StringComparison.OrdinalIgnoreCase) || // kobieta / k
+                         gender.Trim().StartsWith("w", StringComparison.OrdinalIgnoreCase));   // woman / w
+
+        decimal fiberGoal = 30m;          // g  – błonnik
+        decimal sugarsGoal = 50m;         // g  – cukry (górny limit wg WHO)
+        decimal saturatedFatGoal = 20m;   // g  – tłuszcze nasycone (górny limit)
+        decimal sodiumGoal = 2300m;       // mg – sód (górny limit ~5g soli)
+        decimal calciumGoal = 1000m;      // mg – wapń
+        decimal ironGoal = isFemale ? 18m : 10m; // mg – żelazo
+
+        return new MicroNutrients(
+            fiberGoal,
+            sugarsGoal,
+            saturatedFatGoal,
+            sodiumGoal,
+            calciumGoal,
+            ironGoal);
     }
 }

@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using FitApp.Application.Features.Water.Queries;
 using FitApp.Domain.Entities;
+using FitApp.Infrastructure.Interfaces;
 using Moq;
 using Xunit;
 

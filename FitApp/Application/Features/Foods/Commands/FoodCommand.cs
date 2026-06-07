@@ -16,6 +16,14 @@ public class CreateFoodCommand : IRequest<Guid>
     public decimal ProteinPer100g { get; set; }
     public decimal CarbsPer100g { get; set; }
     public decimal FatPer100g { get; set; }
+
+    // Mikroskładniki (na 100g)
+    public decimal FiberPer100g { get; set; }
+    public decimal SugarsPer100g { get; set; }
+    public decimal SaturatedFatPer100g { get; set; }
+    public decimal SodiumPer100g { get; set; }
+    public decimal CalciumPer100g { get; set; }
+    public decimal IronPer100g { get; set; }
 }
 
 // 2. Handler, który zapisuje to do bazy
@@ -38,7 +46,13 @@ public class CreateFoodHandler : IRequestHandler<CreateFoodCommand, Guid>
             CaloriesPer100g = request.CaloriesPer100g,
             ProteinPer100g = request.ProteinPer100g,
             CarbsPer100g = request.CarbsPer100g,
-            FatsPer100g = request.FatPer100g
+            FatsPer100g = request.FatPer100g,
+            FiberPer100g = request.FiberPer100g,
+            SugarsPer100g = request.SugarsPer100g,
+            SaturatedFatPer100g = request.SaturatedFatPer100g,
+            SodiumPer100g = request.SodiumPer100g,
+            CalciumPer100g = request.CalciumPer100g,
+            IronPer100g = request.IronPer100g
         };
 
         await _foodRepository.AddAsync(food);

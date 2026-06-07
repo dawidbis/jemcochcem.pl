@@ -1,9 +1,26 @@
 export interface User { userId: string; userEmail: string; }
 export interface MacroNutrients { protein: number; carbs: number; fats: number; }
-export interface Food { id: string; name: string; caloriesPer100g: number; macros: MacroNutrients | null; }
-export interface MealItem { id: string; foodName: string; grams: number; calories: number; macros: MacroNutrients; }
-export interface DiarySummary { date: string; totalCalories: number; totalProtein: number; totalCarbs: number; totalFats: number; items: MealItem[]; }
-export interface ExternalFood { name: string; barcode: string; caloriesPer100g: number; macros: MacroNutrients; }
+// Mikroskładniki: błonnik/cukry/tł. nasycone w g, sód/wapń/żelazo w mg
+export interface MicroNutrients { fiber: number; sugars: number; saturatedFat: number; sodium: number; calcium: number; iron: number; }
+export interface Food { id: string; name: string; caloriesPer100g: number; macros: MacroNutrients | null; micros: MicroNutrients | null; }
+export interface MealItem { id: string; foodName: string; grams: number; calories: number; macros: MacroNutrients; micros: MicroNutrients; }
+export interface DiarySummary {
+  date: string;
+  totalCalories: number;
+  totalProtein: number;
+  totalCarbs: number;
+  totalFats: number;
+  totalFiber: number;
+  totalSugars: number;
+  totalSaturatedFat: number;
+  totalSodium: number;
+  totalCalcium: number;
+  totalIron: number;
+  items: MealItem[];
+}
+export interface ExternalFood { name: string; barcode: string; caloriesPer100g: number; macros: MacroNutrients; micros: MicroNutrients | null; }
+// Dzienne cele mikroskładników (z backendu)
+export interface TargetMicros { fiber: number; sugars: number; saturatedFat: number; sodium: number; calcium: number; iron: number; }
 
 export interface Measurement {
   id: string;

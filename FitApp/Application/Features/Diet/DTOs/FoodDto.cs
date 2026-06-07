@@ -9,4 +9,7 @@ public class FoodDto
 
     // DODANE: Kompozycja z makroskładnikami
     public MacroNutrientsDto? Macros { get; set; }
+
+    // DODANE: Kompozycja z mikroskładnikami
+    public MicroNutrientsDto? Micros { get; set; }
 }

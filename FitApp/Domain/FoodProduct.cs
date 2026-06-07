@@ -8,4 +8,12 @@ public class FoodProduct
     public decimal ProteinPer100g { get; set; }
     public decimal CarbsPer100g { get; set; }
     public decimal FatsPer100g { get; set; }
+
+    // Mikroskładniki (na 100g). Błonnik/cukry/tłuszcze nasycone w gramach, sód/wapń/żelazo w mg.
+    public decimal FiberPer100g { get; set; }
+    public decimal SugarsPer100g { get; set; }
+    public decimal SaturatedFatPer100g { get; set; }
+    public decimal SodiumPer100g { get; set; }
+    public decimal CalciumPer100g { get; set; }
+    public decimal IronPer100g { get; set; }
 }

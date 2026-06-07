@@ -60,19 +60,36 @@ public class GetDailyDiaryHandler : IRequestHandler<GetDailyDiaryQuery, DiaryDto
         {
             Date = log.Date,
             TotalCalories = log.TotalCalories,
-            TotalProtein = log.TotalProtein, 
+            TotalProtein = log.TotalProtein,
             TotalCarbs = log.TotalCarbs,
             TotalFats = log.TotalFats,
 
-            Items = log.Items.Select(item => 
+            TotalFiber = log.TotalFiber,
+            TotalSugars = log.TotalSugars,
+            TotalSaturatedFat = log.TotalSaturatedFat,
+            TotalSodium = log.TotalSodium,
+            TotalCalcium = log.TotalCalcium,
+            TotalIron = log.TotalIron,
+
+            Items = log.Items.Select(item =>
             {
-                ArgumentNullException.ThrowIfNull(item.FoodProduct); 
+                ArgumentNullException.ThrowIfNull(item.FoodProduct);
 
                 var calculatedMacros = _nutritionService.CalculateItemMacros(
-                    item.Grams, 
-                    item.FoodProduct.ProteinPer100g, 
-                    item.FoodProduct.CarbsPer100g, 
+                    item.Grams,
+                    item.FoodProduct.ProteinPer100g,
+                    item.FoodProduct.CarbsPer100g,
                     item.FoodProduct.FatsPer100g
+                );
+
+                var calculatedMicros = _nutritionService.CalculateItemMicros(
+                    item.Grams,
+                    item.FoodProduct.FiberPer100g,
+                    item.FoodProduct.SugarsPer100g,
+                    item.FoodProduct.SaturatedFatPer100g,
+                    item.FoodProduct.SodiumPer100g,
+                    item.FoodProduct.CalciumPer100g,
+                    item.FoodProduct.IronPer100g
                 );
 
                 return new MealLogItemDto
@@ -81,12 +98,22 @@ public class GetDailyDiaryHandler : IRequestHandler<GetDailyDiaryQuery, DiaryDto
                     FoodName = item.FoodProduct.Name,
                     Grams = item.Grams,
                     Calories = _nutritionService.CalculateItemCalories(item.Grams, item.FoodProduct.CaloriesPer100g),
-                    
-                    Macros = new MacroNutrientsDto 
+
+                    Macros = new MacroNutrientsDto
                     {
                         Protein = calculatedMacros.Protein,
                         Carbs = calculatedMacros.Carbs,
                         Fats = calculatedMacros.Fats
+                    },
+
+                    Micros = new MicroNutrientsDto
+                    {
+                        Fiber = calculatedMicros.Fiber,
+                        Sugars = calculatedMicros.Sugars,
+                        SaturatedFat = calculatedMicros.SaturatedFat,
+                        Sodium = calculatedMicros.Sodium,
+                        Calcium = calculatedMicros.Calcium,
+                        Iron = calculatedMicros.Iron
                     }
                 };
             }).ToList()

@@ -52,13 +52,26 @@ public class OpenFoodFactsClient : IOffApiClient
             Fats = GetDecimalSafe(nutrimentsElement, "fat_100g")
         };
 
+        // 5b. Mapujemy mikroskładniki. OFF podaje błonnik/cukry/tł. nasycone w gramach,
+        // a minerały (sód, wapń, żelazo) w gramach na 100g – konwertujemy je na mg (×1000).
+        var micros = new MicroNutrientsDto
+        {
+            Fiber = GetDecimalSafe(nutrimentsElement, "fiber_100g"),
+            Sugars = GetDecimalSafe(nutrimentsElement, "sugars_100g"),
+            SaturatedFat = GetDecimalSafe(nutrimentsElement, "saturated-fat_100g"),
+            Sodium = GetDecimalSafe(nutrimentsElement, "sodium_100g") * 1000m,
+            Calcium = GetDecimalSafe(nutrimentsElement, "calcium_100g") * 1000m,
+            Iron = GetDecimalSafe(nutrimentsElement, "iron_100g") * 1000m
+        };
+
         return new FoodDto
         {
             Id = Guid.Empty, // Pozwalamy, by to Handler/Baza ułożyła własne ID przy zapisie
             Barcode = barcode,
             Name = GetStringSafe(productElement, "product_name") ?? "Nieznany produkt",
             CaloriesPer100g = GetIntSafe(nutrimentsElement, "energy-kcal_100g"),
-            Macros = macros // Podpinamy wyliczone makro!
+            Macros = macros, // Podpinamy wyliczone makro!
+            Micros = micros // Podpinamy wyliczone mikro!
         };
         
     }

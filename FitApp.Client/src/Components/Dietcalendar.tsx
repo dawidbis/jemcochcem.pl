@@ -247,6 +247,14 @@ export function DietCalendar({ user }: Props) {
                   {/* DODANY ODPOWIEDNIK WODY W SZCZEGÓŁACH DNIA */}
                   <span className="text-blue-400 font-semibold">💧 Woda: {selectedWater?.currentAmountMl || 0} ml</span>
                 </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-300">
+                  <span>Błonnik: {Math.round((selectedDiary?.totalFiber || 0) * 10) / 10}g</span>
+                  <span>Cukry: {Math.round((selectedDiary?.totalSugars || 0) * 10) / 10}g</span>
+                  <span>Tł. nasyc.: {Math.round((selectedDiary?.totalSaturatedFat || 0) * 10) / 10}g</span>
+                  <span>Sód: {Math.round((selectedDiary?.totalSodium || 0) * 10) / 10}mg</span>
+                  <span>Wapń: {Math.round((selectedDiary?.totalCalcium || 0) * 10) / 10}mg</span>
+                  <span>Żelazo: {Math.round((selectedDiary?.totalIron || 0) * 10) / 10}mg</span>
+                </div>
               </div>
               <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
                 {selectedDiary && selectedDiary.items.length > 0 ? selectedDiary.items.map(item => (

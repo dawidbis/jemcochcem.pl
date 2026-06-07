@@ -4,6 +4,7 @@ using FitApp.Domain.Entities;
 using FitApp.Infrastructure.Interfaces;
 using Moq;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -30,11 +31,9 @@ public class GenerateMealPlanCommandHandlerTests
     public async Task Handle_ShouldParseJsonAndSaveMealPlan_WhenAiReturnsValidData()
     {
         // Arrange
-        var command = new GenerateMealPlanCommand 
-        { 
-            UserId = Guid.NewGuid(), 
-            Prompt = "dieta keto 2000 kcal" 
-        };
+        var command = new GenerateMealPlanCommand(
+            UserId: Guid.NewGuid(),
+            Prompt: "dieta keto 2000 kcal");
 
         // Udajemy odpowiedź od Gemini API
         string fakeJsonResponse = @"
@@ -60,8 +59,8 @@ public class GenerateMealPlanCommandHandlerTests
         Assert.NotEqual(Guid.Empty, result);
         _repositoryMock.Verify(x => x.AddAsync(It.Is<MealPlan>(p => 
             p.UserId == command.UserId && 
-            p.Items.Count == 1 && 
-            p.Items[0].ProductName == "Jajecznica"
+            p.Items.Count == 1 &&
+            p.Items.First().ProductName == "Jajecznica"
         )), Times.Once);
     }
 }

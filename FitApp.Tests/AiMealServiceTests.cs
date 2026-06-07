@@ -53,7 +53,7 @@ namespace FitApp.Tests.Services
             Assert.Equal(fatGoal, totalFat, 1);
 
             // C. Sprawdzenie zaokrągleń gramatury
-            foreach (var item => item.WeightInGrams)
+            foreach (var item in result.Select(x => x.WeightInGrams))
             {
                 Assert.True(item > 0, $"Gramatura składnika {item} nie może być zerowa ani ujemna");
                 

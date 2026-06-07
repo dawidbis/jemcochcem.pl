@@ -68,6 +68,14 @@ public class AddAiMealToDiaryCommandHandler
         mealLog.TotalCarbs += food.CarbsPer100g * multiplier;
         mealLog.TotalFats += food.FatsPer100g * multiplier;
 
+        // Mikroskładniki (spójne z resztą sumowania – produkty AI mają domyślnie 0)
+        mealLog.TotalFiber += food.FiberPer100g * multiplier;
+        mealLog.TotalSugars += food.SugarsPer100g * multiplier;
+        mealLog.TotalSaturatedFat += food.SaturatedFatPer100g * multiplier;
+        mealLog.TotalSodium += food.SodiumPer100g * multiplier;
+        mealLog.TotalCalcium += food.CalciumPer100g * multiplier;
+        mealLog.TotalIron += food.IronPer100g * multiplier;
+
         // 3. Zapisujemy zmiany w MealLog (zaktualizowane sumy)
         // Zakładam, że masz metodę Update w swoim repozytorium
         await _mealLogRepo.UpdateAsync(mealLog);

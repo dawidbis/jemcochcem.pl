@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { User, DiarySummary, Food, ExternalFood } from '../types';
+import type { User, DiarySummary, Food, ExternalFood, TargetMicros } from '../types';
 import { ManualFoodForm } from './ManualFoodForm';
 import type { TargetMacros } from './TdeeCalculator';
 import { api } from '../api';
@@ -17,7 +17,11 @@ export function FoodDiary({ user }: { user: User }) {
   const [externalFood, setExternalFood] = useState<ExternalFood | null>(null);
   const [grams, setGrams] = useState(100);
   const [targets, setTargets] = useState<TargetMacros | null>(null);
+  const [microTargets, setMicroTargets] = useState<TargetMicros | null>(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+
+  // Zaokrąglenie do 1 miejsca po przecinku dla czytelności
+  const fmt = (n: number | undefined | null) => Math.round((n || 0) * 10) / 10;
 
   const isToday = selectedDate === new Date().toISOString().split('T')[0];
 
@@ -35,7 +39,7 @@ export function FoodDiary({ user }: { user: User }) {
   const loadDiary = async () => {
     const data = await api.loadDiary(selectedDate, user.userId);
     if (data) setDiary(data);
-    else setDiary({ date: selectedDate, items: [], totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 });
+    else setDiary({ date: selectedDate, items: [], totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0, totalFiber: 0, totalSugars: 0, totalSaturatedFat: 0, totalSodium: 0, totalCalcium: 0, totalIron: 0 });
   };
 
   useEffect(() => { loadDiary(); }, [selectedDate]);
@@ -58,6 +62,9 @@ export function FoodDiary({ user }: { user: User }) {
         fats: data.fats || data.fat
       });
     });
+    api.calculateMicros(user.userId).then((data: TargetMicros | null) => {
+      if (data) setMicroTargets(data);
+    });
   }, [user.userId]);
 
   const fetchExternal = async () => {
@@ -67,7 +74,20 @@ export function FoodDiary({ user }: { user: User }) {
 
   const saveExternal = async () => {
     if (!externalFood) return;
-    const payload = { name: externalFood.name, barcode, caloriesPer100g: externalFood.caloriesPer100g, proteinPer100g: externalFood.macros?.protein || 0, carbsPer100g: externalFood.macros?.carbs || 0, fatPer100g: externalFood.macros?.fats || 0 };
+    const payload = {
+      name: externalFood.name,
+      barcode,
+      caloriesPer100g: externalFood.caloriesPer100g,
+      proteinPer100g: externalFood.macros?.protein || 0,
+      carbsPer100g: externalFood.macros?.carbs || 0,
+      fatPer100g: externalFood.macros?.fats || 0,
+      fiberPer100g: externalFood.micros?.fiber || 0,
+      sugarsPer100g: externalFood.micros?.sugars || 0,
+      saturatedFatPer100g: externalFood.micros?.saturatedFat || 0,
+      sodiumPer100g: externalFood.micros?.sodium || 0,
+      calciumPer100g: externalFood.micros?.calcium || 0,
+      ironPer100g: externalFood.micros?.iron || 0,
+    };
     await api.saveFood(payload);
     setExternalFood(null); setBarcode('');
   };
@@ -81,6 +101,16 @@ export function FoodDiary({ user }: { user: User }) {
     await api.deleteMealItem(selectedDate, itemId, user.userId);
     loadDiary();
   };
+
+  // Konfiguracja kafelków mikroskładników (klasy Tailwind muszą być literałami)
+  const microTiles = [
+    { label: 'Błonnik', unit: 'g', value: diary?.totalFiber, target: microTargets?.fiber, text: 'text-emerald-600', barBg: 'bg-emerald-50', barFill: 'bg-emerald-500' },
+    { label: 'Cukry', unit: 'g', value: diary?.totalSugars, target: microTargets?.sugars, text: 'text-pink-600', barBg: 'bg-pink-50', barFill: 'bg-pink-500' },
+    { label: 'Tł. nasycone', unit: 'g', value: diary?.totalSaturatedFat, target: microTargets?.saturatedFat, text: 'text-orange-600', barBg: 'bg-orange-50', barFill: 'bg-orange-500' },
+    { label: 'Sód', unit: 'mg', value: diary?.totalSodium, target: microTargets?.sodium, text: 'text-violet-600', barBg: 'bg-violet-50', barFill: 'bg-violet-500' },
+    { label: 'Wapń', unit: 'mg', value: diary?.totalCalcium, target: microTargets?.calcium, text: 'text-teal-600', barBg: 'bg-teal-50', barFill: 'bg-teal-500' },
+    { label: 'Żelazo', unit: 'mg', value: diary?.totalIron, target: microTargets?.iron, text: 'text-red-700', barBg: 'bg-red-50', barFill: 'bg-red-500' },
+  ];
 
   return (
     <div className="space-y-6 w-full max-w-7xl mx-auto">
@@ -149,13 +179,40 @@ export function FoodDiary({ user }: { user: User }) {
         ) : null}
       </div>
 
-      <WaterTracker 
-        key={`${selectedDate}-${diary?.totalProtein}`} 
-        userId={user.userId} 
-        date={selectedDate} 
+      <WaterTracker
+        key={`${selectedDate}-${diary?.totalProtein}`}
+        userId={user.userId}
+        date={selectedDate}
       />
 
 </div>
+
+      {/* Podsumowanie mikroskładników */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100">
+          <h2 className="font-semibold text-slate-800">Mikroskładniki</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Najważniejsze składniki odżywcze dla zdrowia</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-5">
+          {microTiles.map(tile => {
+            const value = fmt(tile.value);
+            const pct = tile.target ? Math.min(100, (value / tile.target) * 100) : 0;
+            return (
+              <div key={tile.label} className="bg-slate-50/50 rounded-xl border border-slate-100 p-4">
+                <span className={`text-xs font-medium uppercase tracking-wider ${tile.text}`}>{tile.label}</span>
+                <p className="text-xl font-bold text-slate-900 mt-1">
+                  {value}<span className="text-sm font-normal text-slate-400">{tile.unit} / {tile.target ? `${fmt(tile.target)}${tile.unit}` : '-'}</span>
+                </p>
+                {tile.target ? (
+                  <div className={`mt-3 h-2 rounded-full overflow-hidden ${tile.barBg}`}>
+                    <div className={`h-full rounded-full transition-all duration-500 ${tile.barFill}`} style={{ width: `${pct}%` }} />
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
         {/* Lewa: Lista posiłków + wyszukiwarka */}
@@ -182,6 +239,16 @@ export function FoodDiary({ user }: { user: User }) {
                         <span className="text-rose-600">T: {item.macros?.fats}g</span>
                       </div>
                     </div>
+                    {item.micros && (
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[11px] font-medium text-slate-500">
+                        <span className="text-emerald-600">Błonnik: {fmt(item.micros.fiber)}g</span>
+                        <span className="text-pink-600">Cukry: {fmt(item.micros.sugars)}g</span>
+                        <span className="text-orange-600">Nasyc.: {fmt(item.micros.saturatedFat)}g</span>
+                        <span className="text-violet-600">Sód: {fmt(item.micros.sodium)}mg</span>
+                        <span className="text-teal-600">Wapń: {fmt(item.micros.calcium)}mg</span>
+                        <span className="text-red-700">Żelazo: {fmt(item.micros.iron)}mg</span>
+                      </div>
+                    )}
                   </div>
                   <Button variant="ghost" className="text-slate-300 hover:text-red-600 hover:bg-red-50 h-8 w-8 p-0 rounded-full shrink-0" onClick={() => deleteMeal(item.id)}>✖</Button>
                 </div>
@@ -214,6 +281,16 @@ export function FoodDiary({ user }: { user: User }) {
                         <span className="text-amber-600">W: {f.macros?.carbs || 0}</span>
                         <span className="text-rose-600">T: {f.macros?.fats || 0}</span>
                       </div>
+                      {f.micros && (f.micros.fiber || f.micros.sugars || f.micros.saturatedFat || f.micros.sodium || f.micros.calcium || f.micros.iron) ? (
+                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1 text-[10px] font-medium text-slate-400">
+                          <span>Błonnik {fmt(f.micros.fiber)}g</span>
+                          <span>Cukry {fmt(f.micros.sugars)}g</span>
+                          <span>Nasyc. {fmt(f.micros.saturatedFat)}g</span>
+                          <span>Sód {fmt(f.micros.sodium)}mg</span>
+                          <span>Wapń {fmt(f.micros.calcium)}mg</span>
+                          <span>Żelazo {fmt(f.micros.iron)}mg</span>
+                        </div>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <Input type="number" className="w-16 text-center bg-slate-50 h-9 text-sm" value={grams} onChange={(e: any) => setGrams(Number(e.target.value))} />
@@ -247,6 +324,21 @@ export function FoodDiary({ user }: { user: User }) {
               {externalFood && (
                 <div className="p-4 border border-blue-100 rounded-xl bg-blue-50 flex flex-col gap-3 mt-4">
                   <strong className="text-blue-900">{externalFood.name}</strong>
+                  <div className="flex gap-3 text-xs font-semibold">
+                    <span className="text-blue-600">B: {fmt(externalFood.macros?.protein)}g</span>
+                    <span className="text-amber-600">W: {fmt(externalFood.macros?.carbs)}g</span>
+                    <span className="text-rose-600">T: {fmt(externalFood.macros?.fats)}g</span>
+                  </div>
+                  {externalFood.micros && (
+                    <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-500">
+                      <span>Błonnik {fmt(externalFood.micros.fiber)}g</span>
+                      <span>Cukry {fmt(externalFood.micros.sugars)}g</span>
+                      <span>Nasyc. {fmt(externalFood.micros.saturatedFat)}g</span>
+                      <span>Sód {fmt(externalFood.micros.sodium)}mg</span>
+                      <span>Wapń {fmt(externalFood.micros.calcium)}mg</span>
+                      <span>Żelazo {fmt(externalFood.micros.iron)}mg</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center text-sm font-medium">
                     <span>{externalFood.caloriesPer100g} kcal/100g</span>
                     <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={saveExternal}>Zapisz</Button>
