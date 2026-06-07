@@ -26,8 +26,7 @@ public class AiService : IAiService
 
     public async Task<string> AskCoachAsync(string prompt)
     {
-       var requestUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={_apiKey}";
-
+       var requestUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_apiKey}";
         var requestBody = new
         {
             contents = new[]
