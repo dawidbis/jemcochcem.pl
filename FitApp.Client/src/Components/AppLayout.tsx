@@ -1,7 +1,7 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";
-import { LogOut, Utensils, Scale, User, Sparkles, Calendar } from "lucide-react";
+import { LogOut, Utensils, Scale, User, Sparkles, Calendar, Dumbbell, History } from "lucide-react";
 
-type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher';
+type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher' | 'workout-log' | 'workout-history';
 
 interface Props {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ export function AppLayout({ children, onLogout, activePage, onNavigate }: Props)
           <SidebarContent className="py-6">
             <SidebarGroup>
               <SidebarMenu className="space-y-2 px-4">
-                
+
                 <SidebarMenuItem>
                   <SidebarMenuButton onClick={() => onNavigate('diary')} className={`w-full transition-colors rounded-lg py-6 font-medium ${activePage === 'diary' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}>
                     <Utensils className="mr-2 h-5 w-5" />
@@ -37,6 +37,20 @@ export function AppLayout({ children, onLogout, activePage, onNavigate }: Props)
                   <SidebarMenuButton onClick={() => onNavigate('ai-matcher')} className={`w-full transition-colors rounded-lg py-6 font-medium ${activePage === 'ai-matcher' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}>
                     <Sparkles className="mr-2 h-5 w-5 text-indigo-500" />
                     <span className="text-base font-semibold">Dobór Posiłku AI</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => onNavigate('workout-log')} className={`w-full transition-colors rounded-lg py-6 font-medium ${activePage === 'workout-log' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <Dumbbell className="mr-2 h-5 w-5" />
+                    <span className="text-base">Zaloguj trening</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => onNavigate('workout-history')} className={`w-full transition-colors rounded-lg py-6 font-medium ${activePage === 'workout-history' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <History className="mr-2 h-5 w-5" />
+                    <span className="text-base">Historia treningów</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 

@@ -8,9 +8,9 @@ import { UserProfile } from './Components/UserProfile';
 import { AiMealMatcher } from './Components/AiMealMatcher';
 import './App.css';
 import { AppLayout } from './Components/AppLayout';
-
-type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher';
-
+import { WorkoutLogger } from './Components/WorkoutLogger';
+import { WorkoutHistory } from './Components/WorkoutHistory';
+type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher' | 'workout-log' | 'workout-history';
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [page, setPage] = useState<Page>('diary');
@@ -29,6 +29,8 @@ export default function App() {
       {page === 'measurements' && <BodyMeasurements user={user} />}
       {page === 'profile' && <UserProfile userId={user.userId} />}
       {page === 'ai-matcher' && <AiMealMatcher />}
-    </AppLayout>
+     {page === 'workout-log' && <WorkoutLogger userId={user.userId} />}
+{page === 'workout-history' && <WorkoutHistory userId={user.userId} />} </AppLayout>
   );
+  
 }
