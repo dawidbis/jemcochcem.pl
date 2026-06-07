@@ -51,6 +51,15 @@ public class SearchFoodsHandler : IRequestHandler<SearchFoodsQuery, IEnumerable<
                 Protein = f.ProteinPer100g,
                 Carbs = f.CarbsPer100g,
                 Fats = f.FatsPer100g
+            },
+            Micros = new MicroNutrientsDto
+            {
+                Fiber = f.FiberPer100g,
+                Sugars = f.SugarsPer100g,
+                SaturatedFat = f.SaturatedFatPer100g,
+                Sodium = f.SodiumPer100g,
+                Calcium = f.CalciumPer100g,
+                Iron = f.IronPer100g
             }
         });
     }
@@ -84,13 +93,23 @@ public class GetFoodByIdHandler : IRequestHandler<GetFoodByIdQuery, FoodDto>
             Carbs = food.CarbsPer100g,
             Fats = food.FatsPer100g
         };
+        var micros = new MicroNutrientsDto
+        {
+            Fiber = food.FiberPer100g,
+            Sugars = food.SugarsPer100g,
+            SaturatedFat = food.SaturatedFatPer100g,
+            Sodium = food.SodiumPer100g,
+            Calcium = food.CalciumPer100g,
+            Iron = food.IronPer100g
+        };
         return new FoodDto
         {
             Id = food.Id,
             Barcode = food.Barcode ?? string.Empty,
             Name = food.Name,
             CaloriesPer100g = food.CaloriesPer100g,
-            Macros = macros
+            Macros = macros,
+            Micros = micros
         };
     }
 }

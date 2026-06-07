@@ -33,6 +33,14 @@ namespace FitApp.API.Controllers
             return Ok(result);
         }
 
+        [HttpPost("{id}/micros")]
+        public async Task<IActionResult> GetMicros([FromRoute] Guid id)
+        {
+            // Dzienne cele mikroskładników (zależne m.in. od płci użytkownika)
+            var result = await _mediator.Send(new CalculateMicrosCommand(id));
+            return Ok(result);
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {

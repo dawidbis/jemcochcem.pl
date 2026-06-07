@@ -53,7 +53,13 @@ public class AddExternalMealItemHandler : IRequestHandler<AddExternalMealItemCom
                 CaloriesPer100g = externalProduct.CaloriesPer100g,
                 ProteinPer100g = externalProduct.Macros.Protein,
                 CarbsPer100g = externalProduct.Macros.Carbs,
-                FatsPer100g = externalProduct.Macros.Fats
+                FatsPer100g = externalProduct.Macros.Fats,
+                FiberPer100g = externalProduct.Micros?.Fiber ?? 0m,
+                SugarsPer100g = externalProduct.Micros?.Sugars ?? 0m,
+                SaturatedFatPer100g = externalProduct.Micros?.SaturatedFat ?? 0m,
+                SodiumPer100g = externalProduct.Micros?.Sodium ?? 0m,
+                CalciumPer100g = externalProduct.Micros?.Calcium ?? 0m,
+                IronPer100g = externalProduct.Micros?.Iron ?? 0m
             };
 
             // 4. Zapisujemy produkt na stałe w naszej bazie

@@ -1,6 +1,7 @@
 using FitApp.Application.Features.Diary.AddAiMealToDiary;
 using FitApp.Domain.Entities;
 using FitApp.Infrastructure.Interfaces;
+using Microsoft.Extensions.Caching.Distributed;
 using Moq;
 using System;
 using System.Threading;
@@ -14,6 +15,7 @@ public class AddAiMealToDiaryCommandHandlerTests
     private readonly Mock<IMealPlanRepository> _mealPlanRepoMock;
     private readonly Mock<IFoodRepository> _foodRepoMock;
     private readonly Mock<IMealLogRepository> _mealLogRepoMock;
+    private readonly Mock<IDistributedCache> _cacheMock;
     private readonly AddAiMealToDiaryCommandHandler _handler;
 
     public AddAiMealToDiaryCommandHandlerTests()
@@ -21,23 +23,23 @@ public class AddAiMealToDiaryCommandHandlerTests
         _mealPlanRepoMock = new Mock<IMealPlanRepository>();
         _foodRepoMock = new Mock<IFoodRepository>();
         _mealLogRepoMock = new Mock<IMealLogRepository>();
+        _cacheMock = new Mock<IDistributedCache>();
 
         _handler = new AddAiMealToDiaryCommandHandler(
             _mealPlanRepoMock.Object,
             _foodRepoMock.Object,
-            _mealLogRepoMock.Object);
+            _mealLogRepoMock.Object,
+            _cacheMock.Object);
     }
 
     [Fact]
     public async Task Handle_ShouldCreateNewMealLog_WhenLogDoesNotExist()
     {
         // Arrange
-        var command = new AddAiMealToDiaryCommand 
-        { 
-            UserId = Guid.NewGuid(), 
-            MealPlanItemId = Guid.NewGuid(), 
-            Date = DateTime.UtcNow.Date 
-        };
+        var command = new AddAiMealToDiaryCommand(
+            UserId: Guid.NewGuid(),
+            MealPlanItemId: Guid.NewGuid(),
+            Date: DateTime.UtcNow.Date);
 
         var fakePlanItem = new MealPlanItem 
         { 

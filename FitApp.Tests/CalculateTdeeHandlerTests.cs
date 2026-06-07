@@ -4,6 +4,7 @@ using FitApp.Application.Features.Profile;
 using FitApp.Domain.Entities;
 using FitApp.Domain.Interfaces;
 using FitApp.Domain.Services;
+using FitApp.Infrastructure.Interfaces;
 using FluentAssertions;
 using Moq;
 using System;
@@ -41,7 +42,7 @@ public class CalculateTdeeHandlerTests
         _userRepositoryMock.Setup(repo => repo.GetByIdAsync(userId))
             .ReturnsAsync(user);
 
-        var command = new CalculateTdeeCommand { UserId = userId, ActivityLevel = 1.2m };
+        var command = new CalculateTdeeCommand(userId, 1.2m);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
