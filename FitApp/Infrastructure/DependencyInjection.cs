@@ -31,6 +31,9 @@ public static class DependencyInjection
         services.AddScoped<IMealPlanRepository, MealPlanRepository>();
         services.AddHttpClient<IAiService, AiService>();
         services.AddScoped<IWaterLogRepository, WaterLogRepository>();
+        
+        services.AddScoped<IWorkoutRepository, WorkoutRepository>();
+services.AddScoped<IWorkoutCalculationService, WorkoutCalculationService>();
         return services;
     }
 }
