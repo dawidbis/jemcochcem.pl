@@ -79,3 +79,43 @@ export interface WaterStatusDto {
   isExtraHydrationRequired: boolean;
   alertMessage: string;
 }
+export interface Exercise {
+  id: string;
+  name: string;
+  muscleGroup: string;
+  isCustom: boolean;
+}
+
+export interface LoggedSet {
+  exerciseId: string;
+  setNumber: number;
+  weight: number;
+  reps: number;
+}
+
+export interface WorkoutSet {
+  exerciseId: string;
+  exerciseName: string;
+  muscleGroup: string;
+  setNumber: number;
+  weight: number;
+  reps: number;
+}
+
+export interface WorkoutSession {
+  id: string;
+  date: string;
+  notes?: string | null;
+  durationMinutes?: number | null;
+  totalSets: number;
+  totalVolume: number;
+  sets: WorkoutSet[];
+}
+
+export interface LogWorkoutPayload {
+  userId: string;
+  date: string;
+  notes?: string | null;
+  durationMinutes?: number | null;
+  sets: LoggedSet[];
+}

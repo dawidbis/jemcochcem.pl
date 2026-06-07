@@ -1,5 +1,4 @@
-import type { DiarySummary, Food, ExternalFood, Measurement, MeasurementStats, CreateMeasurementPayload, AiMealPlan, WaterStatusDto } from './types';
-
+import type { DiarySummary, Food, ExternalFood, Measurement, MeasurementStats, CreateMeasurementPayload, AiMealPlan, WaterStatusDto, Exercise, WorkoutSession, LogWorkoutPayload } from './types';
 export const api = {
   async loadDiary(date: string, userId: string): Promise<DiarySummary | null> {
     const res = await fetch(`/api/diary/${date}?userId=${userId}`);
@@ -115,5 +114,23 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-  }
+  },
+  // --- Treningi ---
+  async getExercises(userId: string): Promise<Exercise[]> {
+    const res = await fetch(`/api/Workouts/exercises?userId=${userId}`);
+    return res.ok ? res.json() : [];
+  },
+
+  async logWorkout(payload: LogWorkoutPayload) {
+    return fetch('/api/Workouts/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getWorkoutHistory(userId: string): Promise<WorkoutSession[]> {
+    const res = await fetch(`/api/Workouts/sessions?userId=${userId}`);
+    return res.ok ? res.json() : [];
+  },
 };
