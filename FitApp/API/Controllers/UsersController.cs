@@ -4,6 +4,7 @@ using FitApp.Infrastructure.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using BCrypt.Net;
 
 namespace FitApp.API.Controllers
@@ -13,6 +14,8 @@ namespace FitApp.API.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
+        private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
         private readonly IMediator _mediator;
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwt;
@@ -84,17 +87,17 @@ namespace FitApp.API.Controllers
             return Ok(new { accessToken, refreshToken });
         }
 
-        [HttpPost("{id}/macros")]
-        public async Task<IActionResult> GetMacros([FromRoute] Guid id)
+        [HttpPost("me/macros")]
+        public async Task<IActionResult> GetMacros()
         {
-            var result = await _mediator.Send(new CalculateMacrosCommand(id));
+            var result = await _mediator.Send(new CalculateMacrosCommand(CurrentUserId));
             return Ok(result);
         }
 
-        [HttpPost("{id}/micros")]
-        public async Task<IActionResult> GetMicros([FromRoute] Guid id)
+        [HttpPost("me/micros")]
+        public async Task<IActionResult> GetMicros()
         {
-            var result = await _mediator.Send(new CalculateMicrosCommand(id));
+            var result = await _mediator.Send(new CalculateMicrosCommand(CurrentUserId));
             return Ok(result);
         }
 
@@ -139,10 +142,10 @@ namespace FitApp.API.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}/target-weight")]
-        public async Task<IActionResult> SetTargetWeight(Guid id, [FromBody] SetTargetWeightRequest request)
+        [HttpPut("me/target-weight")]
+        public async Task<IActionResult> SetTargetWeight([FromBody] SetTargetWeightRequest request)
         {
-            var ok = await _mediator.Send(new SetTargetWeightCommand(id, request.TargetWeight));
+            var ok = await _mediator.Send(new SetTargetWeightCommand(CurrentUserId, request.TargetWeight));
             return ok ? NoContent() : NotFound();
         }
 

@@ -86,12 +86,12 @@ export const api = {
   async updateUserProfile(userId: string, payload: any) {
     return authFetch(`/api/users/${userId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   },
-  async calculateMacros(userId: string, multiplier: number) {
-    const res = await authFetch(`/api/users/${userId}/macros`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(multiplier) });
+  async calculateMacros() {
+    const res = await authFetch('/api/users/me/macros', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
     return res.ok ? res.json() : null;
   },
-  async calculateMicros(userId: string) {
-    const res = await authFetch(`/api/users/${userId}/micros`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+  async calculateMicros() {
+    const res = await authFetch('/api/users/me/micros', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
     return res.ok ? res.json() : null;
   },
 
@@ -118,8 +118,8 @@ export const api = {
     const res = await authFetch(`/api/measurements/${id}`, { method: 'DELETE' });
     return res.ok;
   },
-  async setTargetWeight(userId: string, targetWeight: number | null): Promise<boolean> {
-    const res = await authFetch(`/api/users/${userId}/target-weight`, {
+  async setTargetWeight(targetWeight: number | null): Promise<boolean> {
+    const res = await authFetch('/api/users/me/target-weight', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ targetWeight }),

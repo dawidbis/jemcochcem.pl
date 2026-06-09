@@ -61,8 +61,8 @@ export function DietCalendar({ user }: Props) {
         try {
           // Pobieramy dane z obu pionów biznesowych równolegle
           const [diary, water] = await Promise.all([
-            api.loadDiary(dateStr, user.userId),
-            api.getWaterStatus(user.userId, dateStr)
+          api.loadDiary(dateStr),
+          api.getWaterStatus(dateStr)
           ]);
 
           // Zapisujemy dzień w historii jeśli użytkownik cokolwiek zjadł lub wypił
@@ -84,9 +84,8 @@ export function DietCalendar({ user }: Props) {
       setSelectedWater(null); 
       return; 
     }
-    api.loadDiary(selectedDate, user.userId).then((d: any) => setSelectedDiary(d));
-    api.getWaterStatus(user.userId, selectedDate).then((w: any) => setSelectedWater(w));
-  }, [selectedDate]);
+   api.loadDiary(selectedDate).then((d: any) => setSelectedDiary(d));
+api.getWaterStatus(selectedDate).then((w: any) => setSelectedWater(w));  }, [selectedDate]);
 
   const selectDay = (day: number) => {
     const d = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;

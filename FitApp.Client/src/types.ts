@@ -45,7 +45,6 @@ export interface MeasurementStats {
 }
 
 export interface CreateMeasurementPayload {
-  userId: string;
   weight: number;
   date: string;
   bodyFatPercentage?: number | null;
@@ -113,7 +112,6 @@ export interface WorkoutSession {
 }
 
 export interface LogWorkoutPayload {
-  userId: string;
   date: string;
   notes?: string | null;
   durationMinutes?: number | null;

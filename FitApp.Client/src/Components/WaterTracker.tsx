@@ -14,7 +14,8 @@ export const WaterTracker: React.FC<WaterTrackerProps> = ({ userId, date }) => {
 
   const loadWaterData = async () => {
     setLoading(true);
-    const data = await api.getWaterStatus(userId, date);
+    const data = await api.getWaterStatus(date);
+
     if (data) setStatus(data);
     setLoading(false);
   };
@@ -24,7 +25,7 @@ export const WaterTracker: React.FC<WaterTrackerProps> = ({ userId, date }) => {
   }, [date, userId]);
 
   const handleLogWater = async (amountMl: number) => {
-    await api.logWater({ userId, date, amountMl });
+    await api.logWater({ date, amountMl });
     await loadWaterData();
   };
 

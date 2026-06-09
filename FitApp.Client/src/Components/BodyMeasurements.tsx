@@ -78,8 +78,8 @@ export function BodyMeasurements({ user }: Props) {
   const load = useCallback(async () => {
     setLoading(true);
     const [m, s] = await Promise.all([
-      api.getMeasurements(user.userId),
-      api.getMeasurementStats(user.userId),
+      api.getMeasurements(),
+      api.getMeasurementStats(),
     ]);
     setMeasurements(m);
     setStats(s);
@@ -94,7 +94,6 @@ export function BodyMeasurements({ user }: Props) {
     if (!form.weight || !form.date) return;
 
     await api.createMeasurement({
-      userId: user.userId,
       weight: Number(form.weight),
       date: new Date(form.date).toISOString(),
       bodyFatPercentage: form.bodyFatPercentage ? Number(form.bodyFatPercentage) : null,
@@ -114,7 +113,7 @@ export function BodyMeasurements({ user }: Props) {
 
   const handleSaveTarget = async () => {
     const val = targetInput ? Number(targetInput) : null;
-    await api.setTargetWeight(user.userId, val);
+    await api.setTargetWeight(val);
     setEditingTarget(false);
     await load();
   };

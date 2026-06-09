@@ -2,14 +2,10 @@ using FitApp.Application.Features.GenerateMealPlan;
 using FitApp.Infrastructure.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace FitApp.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class MealPlansController : ControllerBase
+public class MealPlansController : ApiControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMealPlanRepository _mealPlanRepo;
@@ -23,31 +19,20 @@ public class MealPlansController : ControllerBase
     [HttpPost("generate")]
     public async Task<IActionResult> GenerateMealPlan([FromBody] GenerateMealPlanRequest request)
     {
-        var command = new GenerateMealPlanCommand(request.UserId, request.Prompt);
+        var command = new GenerateMealPlanCommand(CurrentUserId, request.Prompt);
         var mealPlanId = await _mediator.Send(command);
         return Ok(new { MealPlanId = mealPlanId });
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUserMealPlans([FromQuery] Guid userId)
+    public async Task<IActionResult> GetUserMealPlans()
     {
-        try 
-        {
-            // Sprawdź logi dockera – jeśli tu jest błąd, to wina repozytorium
-            var plans = await _mealPlanRepo.GetByUserIdAsync(userId);
-            return Ok(plans);
-        }
-        catch (Exception ex)
-        {
-            // Zaloguj błąd do konsoli, żebyś wiedział co się dzieje
-            Console.WriteLine($"Błąd pobierania planów: {ex.Message}");
-            return StatusCode(500, "Błąd serwera przy pobieraniu planów.");
-        }
+        var plans = await _mealPlanRepo.GetByUserIdAsync(CurrentUserId);
+        return Ok(plans);
     }
 }
 
 public class GenerateMealPlanRequest
 {
-    public Guid UserId { get; set; }
     public string Prompt { get; set; } = string.Empty;
 }

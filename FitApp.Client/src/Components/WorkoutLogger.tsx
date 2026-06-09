@@ -19,7 +19,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ userId }) => {
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getExercises(userId).then(setExercises);
+    api.getExercises().then(setExercises);
   }, [userId]);
 
   // mapa nazw ćwiczeń dla podglądu serii
@@ -54,10 +54,8 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ userId }) => {
     setSaving(true);
     setSavedMsg(null);
 
-    const today = new Date().toISOString().split('T')[0];
     const res = await api.logWorkout({
-      userId,
-      date: today,
+      date: new Date().toISOString(),
       notes: notes || null,
       durationMinutes: duration ? parseInt(duration, 10) : null,
       sets: loggedSets,

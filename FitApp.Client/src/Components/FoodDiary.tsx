@@ -37,7 +37,7 @@ export function FoodDiary({ user }: { user: User }) {
   };
 
   const loadDiary = async () => {
-    const data = await api.loadDiary(selectedDate, user.userId);
+    const data = await api.loadDiary(selectedDate);
     if (data) setDiary(data);
     else setDiary({ date: selectedDate, items: [], totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0, totalFiber: 0, totalSugars: 0, totalSaturatedFat: 0, totalSodium: 0, totalCalcium: 0, totalIron: 0 });
   };
@@ -54,7 +54,7 @@ export function FoodDiary({ user }: { user: User }) {
   }, [search]);
   
   useEffect(() => {
-    api.calculateMacros(user.userId, 1.55).then((data: any) => {
+    api.calculateMacros().then((data: any) => {
       if (data) setTargets({
         tdee: data.tdee || data.targetCalories,
         protein: data.protein,
@@ -62,7 +62,7 @@ export function FoodDiary({ user }: { user: User }) {
         fats: data.fats || data.fat
       });
     });
-    api.calculateMicros(user.userId).then((data: TargetMicros | null) => {
+    api.calculateMicros().then((data: TargetMicros | null) => {
       if (data) setMicroTargets(data);
     });
   }, [user.userId]);
@@ -93,13 +93,13 @@ export function FoodDiary({ user }: { user: User }) {
   };
 
   const addMeal = async (foodId: string) => {
-    await api.addMealItem({ userId: user.userId, date: new Date(selectedDate).toISOString(), foodProductId: foodId, grams });
+    await api.addMealItem({ date: new Date(selectedDate).toISOString(), foodProductId: foodId, grams });
+
     loadDiary(); setResults([]); setSearch('');
   };
 
   const deleteMeal = async (itemId: string) => {
-    await api.deleteMealItem(selectedDate, itemId, user.userId);
-    loadDiary();
+await api.deleteMealItem(selectedDate, itemId);    loadDiary();
   };
 
   // Konfiguracja kafelków mikroskładników (klasy Tailwind muszą być literałami)
@@ -350,10 +350,9 @@ export function FoodDiary({ user }: { user: User }) {
         </div>
       </div>
       <div className="pt-8 mt-8 border-t border-slate-200">
-        <AiMealPlanGenerator 
-          userId={user.userId} 
-          date={selectedDate} 
-          onAdded={loadDiary} 
+        <AiMealPlanGenerator
+          date={selectedDate}
+          onAdded={loadDiary}
         />
       </div>
     </div>

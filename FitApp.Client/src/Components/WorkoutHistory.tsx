@@ -12,7 +12,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ userId }) => {
 
   useEffect(() => {
     setLoading(true);
-    api.getWorkoutHistory(userId).then((data) => {
+    api.getWorkoutHistory().then((data) => {
       setSessions(data);
       setLoading(false);
     });

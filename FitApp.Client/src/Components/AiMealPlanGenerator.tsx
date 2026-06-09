@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { api } from '../api';
 import type { AiMealPlan, AiMealPlanItem } from '../types';
 
-export function AiMealPlanGenerator({ userId, date, onAdded }: { userId: string, date: string, onAdded: () => void }) {
+export function AiMealPlanGenerator({ date, onAdded }: { date: string, onAdded: () => void }) {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<AiMealPlan | null>(null);
@@ -19,11 +19,11 @@ export function AiMealPlanGenerator({ userId, date, onAdded }: { userId: string,
 
     try {
       // 1. ZMIANA: Przekazujemy userId do API!
-      const res = await api.generateAiMealPlan({ prompt, userId });
+const res = await api.generateAiMealPlan({ prompt });
       
       if (res && res.mealPlanId) {
         // 2. Pobieramy plany usera i znajdujemy ten nowo wygenerowany
-        const plans = await api.getUserMealPlans(userId);
+        const plans = await api.getUserMealPlans();
         const newPlan = plans.find(p => p.id === res.mealPlanId);
         
         if (newPlan) {
@@ -47,7 +47,7 @@ export function AiMealPlanGenerator({ userId, date, onAdded }: { userId: string,
       const res = await api.addAiMealToDiary({
         mealPlanItemId: itemId,
         date: new Date(date).toISOString(),
-        userId: userId // 2. ZMIANA: Przekazujemy userId do zapisania w dzienniku!
+        // 2. ZMIANA: Przekazujemy userId do zapisania w dzienniku!
       });
 
       if (res.ok) {
