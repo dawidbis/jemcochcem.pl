@@ -5,32 +5,32 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FitApp.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class MeasurementsController : ControllerBase
+public class MeasurementsController : ApiControllerBase
 {
     private readonly IMediator _mediator;
-
     public MeasurementsController(IMediator mediator) => _mediator = mediator;
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateMeasurementCommand command)
+    public async Task<IActionResult> Create([FromBody] CreateMeasurementRequest request)
     {
+        var command = new CreateMeasurementCommand(
+            CurrentUserId, request.Weight, request.Date,
+            request.BodyFatPercentage, request.Waist, request.Hips, request.Notes);
         var id = await _mediator.Send(command);
         return Ok(new { Id = id });
     }
 
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetHistory(Guid userId)
+    [HttpGet("me")]
+    public async Task<IActionResult> GetHistory()
     {
-        var result = await _mediator.Send(new GetMeasurementsQuery(userId));
+        var result = await _mediator.Send(new GetMeasurementsQuery(CurrentUserId));
         return Ok(result);
     }
 
-    [HttpGet("user/{userId}/stats")]
-    public async Task<IActionResult> GetStats(Guid userId)
+    [HttpGet("me/stats")]
+    public async Task<IActionResult> GetStats()
     {
-        var result = await _mediator.Send(new GetMeasurementStatsQuery(userId));
+        var result = await _mediator.Send(new GetMeasurementStatsQuery(CurrentUserId));
         return Ok(result);
     }
 
@@ -40,4 +40,9 @@ public class MeasurementsController : ControllerBase
         var result = await _mediator.Send(new DeleteMeasurementCommand(id));
         return result ? NoContent() : NotFound();
     }
+
+    public record CreateMeasurementRequest(
+        decimal Weight, DateTime Date,
+        decimal? BodyFatPercentage = null, decimal? Waist = null,
+        decimal? Hips = null, string? Notes = null);
 }

@@ -12,7 +12,7 @@ using FitApp.Domain.Services;
 using FitApp.Infrastructure.ExternalServices;
 using FitApp.Application.Interfaces;
 using FitApp.Infrastructure.Repositories;
-
+using FitApp.Infrastructure.Auth;
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
@@ -24,7 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IMealLogRepository, MealLogRepository>();
         services.AddScoped<IFoodRepository, FoodRepository>();
         services.AddScoped<IBodyMeasurementRepository, BodyMeasurementRepository>(); 
-
+        services.AddScoped<IJwtService, JwtService>();
         // --- REJESTRACJA WARSTWY BLL (PUNKT 2) ---
         services.AddScoped<INutritionCalculationService, NutritionCalculationService>();
         services.AddScoped<IMealLogDomainService, MealLogDomainService>();

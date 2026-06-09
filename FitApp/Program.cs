@@ -4,6 +4,9 @@ using FitApp.Infrastructure;
 using FitApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using FitApp.Domain.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -42,19 +45,40 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
     options.InstanceName = "FitApp_";
 });
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+builder.Services.AddAuthorization();
 var app = builder.Build();
-app.UseStaticFiles();
+
 app.UseRouting();
+app.UseCors("VitePolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseDefaultFiles();
-app.UseStaticFiles();
-app.UseCors("VitePolicy");
 
 using (var scope = app.Services.CreateScope())
 {
