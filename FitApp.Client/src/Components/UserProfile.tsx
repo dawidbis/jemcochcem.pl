@@ -15,7 +15,7 @@ export function UserProfile({ userId }: { userId: string }) {
   const handleSave = async () => {
     setStatus('Zapisywanie...');
     const res = await api.updateUserProfile(userId, profile);
-    await api.calculateMacros(userId, multiplier); // Oblicz TDEE przy okazji zapisu
+    await api.calculateMacros();
     if (res.ok) setStatus('Profil i zapotrzebowanie zaktualizowane!');
   };
 

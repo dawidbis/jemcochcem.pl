@@ -16,7 +16,7 @@ export function TdeeCalculator({ userId, onCalculated }: { userId: string, onCal
 
   const calculate = async () => {
     await api.updateUserProfile(userId, profile);
-    const data = await api.calculateMacros(userId, multiplier);
+    const data = await api.calculateMacros();
     
     if (data) {
       onCalculated({
