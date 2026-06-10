@@ -6,7 +6,6 @@ using FitApp.Application.Features.Diet;
 using FitApp.Domain.Entities;
 using FitApp.Domain.Interfaces;
 using FitApp.Infrastructure.Interfaces;
-using Microsoft.Extensions.Caching.Distributed;
 using Moq;
 using FluentAssertions;
 using Xunit;
@@ -15,11 +14,10 @@ public class DeleteMealItemHandlerTests
 {
     private readonly Mock<IMealLogRepository> _mealRepoMock = new();
     private readonly Mock<IMealLogDomainService> _domainServiceMock = new();
-    private readonly Mock<IDistributedCache> _cacheMock = new();
     private readonly DeleteMealItemHandler _handler;
 
     public DeleteMealItemHandlerTests()
-        => _handler = new DeleteMealItemHandler(_mealRepoMock.Object, _domainServiceMock.Object, _cacheMock.Object);
+        => _handler = new DeleteMealItemHandler(_mealRepoMock.Object, _domainServiceMock.Object);
 
     private MealLog LogWithItem(Guid userId, DateTime date, Guid itemId)
     {
@@ -49,7 +47,7 @@ public class DeleteMealItemHandlerTests
         _mealRepoMock.Setup(r => r.GetByDateAsync(userId, DateTime.Today)).ReturnsAsync(log);
 
         var act = () => _handler.Handle(
-            new DeleteMealItemCommand(userId, DateTime.Today, Guid.NewGuid()), // nieistniejące ID
+            new DeleteMealItemCommand(userId, DateTime.Today, Guid.NewGuid()),
             CancellationToken.None);
 
         await act.Should().ThrowAsync<ArgumentException>().WithMessage("*Nie znaleziono posiłku*");
@@ -68,20 +66,5 @@ public class DeleteMealItemHandlerTests
         log.Items.Should().BeEmpty();
         _domainServiceMock.Verify(s => s.RecalculateLogTotals(log), Times.Once);
         _mealRepoMock.Verify(r => r.UpdateAsync(log), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldInvalidateCache_AfterDeletion()
-    {
-        var userId = Guid.NewGuid();
-        var itemId = Guid.NewGuid();
-        var date = new DateTime(2026, 1, 15);
-        var log = LogWithItem(userId, date, itemId);
-        _mealRepoMock.Setup(r => r.GetByDateAsync(userId, date)).ReturnsAsync(log);
-
-        await _handler.Handle(new DeleteMealItemCommand(userId, date, itemId), CancellationToken.None);
-
-        var expectedKey = $"diary:{userId}:2026-01-15";
-        _cacheMock.Verify(c => c.RemoveAsync(expectedKey, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

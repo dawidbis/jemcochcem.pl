@@ -1,7 +1,6 @@
 using FitApp.Domain.Entities;
 using FitApp.Infrastructure.Interfaces;
 using MediatR;
-using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -16,17 +15,14 @@ public class AddAiMealToDiaryCommandHandler
     private readonly IFoodRepository _foodRepo;
     private readonly IMealLogRepository _mealLogRepo;
 
-    private readonly IDistributedCache _cache;
     public AddAiMealToDiaryCommandHandler(
         IMealPlanRepository mealPlanRepo,
         IFoodRepository foodRepo,
-        IMealLogRepository mealLogRepo,
-        IDistributedCache cache)
+        IMealLogRepository mealLogRepo)
     {
         _mealPlanRepo = mealPlanRepo;
         _foodRepo = foodRepo;
         _mealLogRepo = mealLogRepo;
-        _cache = cache;
     }
 
     public async Task<Guid> Handle(
@@ -80,8 +76,6 @@ public class AddAiMealToDiaryCommandHandler
         // Zakładam, że masz metodę Update w swoim repozytorium
         await _mealLogRepo.UpdateAsync(mealLog);
         await _mealLogRepo.SaveChangesAsync();
-        string cacheKey = $"diary:{request.UserId}:{request.Date:yyyy-MM-dd}";
-        await _cache.RemoveAsync(cacheKey, cancellationToken);
         return item.Id;
     }
     private MealLogItem CreateMealLogItem(

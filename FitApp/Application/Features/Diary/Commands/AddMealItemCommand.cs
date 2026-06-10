@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using FitApp.Infrastructure.Interfaces;
 using FitApp.Domain.Entities;
-using Microsoft.Extensions.Caching.Distributed;
 using FitApp.Application.Features.Profile;
 
 public class AddMealItemCommand : IRequest<Unit>
@@ -24,19 +23,15 @@ public class AddMealItemHandler : IRequestHandler<AddMealItemCommand, Unit>
     private readonly IFoodRepository _foodRepository;
       private readonly IUserRepository _userRepository;
     
-    // POPRAWKA 1: Używamy INTERFEJSU zamiast konkretnej klasy
     private readonly IMealLogDomainService _mealLogService;
-
-    private readonly IDistributedCache _cache;
     private readonly IDietStreakService _streakService;
 
     private readonly IMediator _mediator;
 
-    public AddMealItemHandler(  
-        IMealLogRepository mealLogRepository, 
-        IFoodRepository foodRepository, 
+    public AddMealItemHandler(
+        IMealLogRepository mealLogRepository,
+        IFoodRepository foodRepository,
         IMealLogDomainService mealLogService,
-        IDistributedCache cache,
         IDietStreakService streakService,
         IUserRepository userRepository,
         IMediator mediator)
@@ -45,7 +40,6 @@ public class AddMealItemHandler : IRequestHandler<AddMealItemCommand, Unit>
         _foodRepository = foodRepository;
         _userRepository = userRepository;
         _mealLogService = mealLogService;
-        _cache = cache;
         _streakService = streakService;
         _mediator = mediator;
     }
@@ -102,8 +96,6 @@ public class AddMealItemHandler : IRequestHandler<AddMealItemCommand, Unit>
             // tylko wywołuje _context.Entry(entity).State = EntityState.Modified;
             await _mealLogRepository.UpdateAsync(log);
         }
-        string cacheKey = $"diary:{request.UserId}:{request.Date:yyyy-MM-dd}";
-        await _cache.RemoveAsync(cacheKey, ct);
         return Unit.Value;
     }
 }
