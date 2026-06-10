@@ -143,7 +143,7 @@ export function WorkoutProgressionChart() {
                 <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${v}kg`} />
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 13 }}
-                  formatter={(v: any, name: string) => [`${v} kg`, name]}
+                  formatter={(v: any, name) => [`${v} kg`, name ?? ''] as [string, string]}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line type="monotone" dataKey="1RM (kg)" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 0 }} activeDot={{ r: 6 }} />
@@ -165,7 +165,7 @@ export function WorkoutProgressionChart() {
                 <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => `${v}kg`} />
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: 13 }}
-                  formatter={(v: any) => [`${v} kg`, 'Tonaż']}
+                  formatter={(v: any) => [`${v} kg`, 'Tonaż'] as [string, string]}
                 />
                 <Bar dataKey="Tonaż (kg)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
