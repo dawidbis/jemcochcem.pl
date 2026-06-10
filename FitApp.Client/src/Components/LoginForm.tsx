@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { User } from '../types';
-import { api } from '../api';
+import { api, setTokens } from '../api';
 import { Button } from "#components/ui/button";
 import { Input } from "#components/ui/input";
 
@@ -17,7 +17,11 @@ export function LoginForm({ onLogin }: { onLogin: (u: User) => void }) {
       const res = isRegistering ? await api.register(payload) : await api.login(payload);
       if (res.ok) {
         if (isRegistering) { setMsg({ text: 'Utworzono.', isError: false }); setIsRegistering(false); } 
-        else { onLogin(await res.json()); }
+        else {
+          const data = await res.json();
+          setTokens(data.accessToken, data.refreshToken, data.userId);
+          onLogin(data);
+        }
       } else setMsg({ text: 'Błąd operacji.', isError: true });
     } catch { setMsg({ text: 'Błąd sieci.', isError: true }); }
   };

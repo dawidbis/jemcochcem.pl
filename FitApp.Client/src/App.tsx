@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { User } from './types';
+import { clearTokens } from './api';
 import { LoginForm } from './Components/LoginForm';
 import { FoodDiary } from './Components/FoodDiary';
 import { DietCalendar } from './Components/Dietcalendar';
@@ -17,6 +18,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('diary');
 
   const handleLogout = () => {
+    clearTokens();
     setUser(null);
     setPage('diary');
   };
