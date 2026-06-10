@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    name: Backend unit tests (.NET 8)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test FitApp.Tests/FitApp.Tests.csproj --no-build --configuration Release --verbosity normal
+
+  frontend-typecheck:
+    name: Frontend TypeScript check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: FitApp.Client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: FitApp.Client
+
+      - name: TypeScript check
+        run: npx tsc -b --noEmit
+        working-directory: FitApp.Client
+
+      - name: Build
+        run: npm run build
+        working-directory: FitApp.Client
