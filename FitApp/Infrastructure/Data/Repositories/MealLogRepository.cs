@@ -4,6 +4,8 @@ using FitApp.Domain.Entities;
 using FitApp.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public class MealLogRepository : GenericRepository<MealLog>, IMealLogRepository
@@ -16,6 +18,15 @@ public class MealLogRepository : GenericRepository<MealLog>, IMealLogRepository
             .Include(m => m.Items)
             .ThenInclude(i => i.FoodProduct)
             .FirstOrDefaultAsync(m => m.UserId == userId && m.Date.Date == date.Date);
+    }
+
+    public async Task<List<MealLog>> GetMonthAsync(Guid userId, int year, int month)
+    {
+        var from = new DateTime(year, month, 1);
+        var to = from.AddMonths(1);
+        return await _dbSet
+            .Where(m => m.UserId == userId && m.Date >= from && m.Date < to)
+            .ToListAsync();
     }
 
     public async Task AddMealLogItemAsync(MealLogItem item)

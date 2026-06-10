@@ -5,19 +5,13 @@ import {
 } from 'recharts';
 // Dodaliśmy ikonę Droplet dla reprezentacji wody
 import { CalendarDays, Flame, TrendingUp, Droplet } from 'lucide-react';
-import type { User, DiarySummary, WaterStatusDto } from '../types';
+import type { User, DiarySummary } from '../types';
 import { api } from '../api';
 
 interface Props { user: User; }
 
 const MONTH_NAMES = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
 const DAY_NAMES = ['Pn','Wt','Śr','Cz','Pt','Sb','Nd'];
-
-// Interfejs pomocniczy łączący jedzenie i wodę w cache stanowym
-interface DayData {
-  diary: DiarySummary | null;
-  water: WaterStatusDto | null;
-}
 
 export function DietCalendar({ user }: Props) {
   const today = new Date();
@@ -28,8 +22,8 @@ export function DietCalendar({ user }: Props) {
   const [selectedDiary, setSelectedDiary] = useState<DiarySummary | null>(null);
   const [selectedWater, setSelectedWater] = useState<WaterStatusDto | null>(null);
   
-  // Przebudowany stan z obsługą agregacji jedzenia i wody
-  const [monthData, setMonthData] = useState<Record<string, DayData>>({});
+  type DaySummary = { totalCalories: number; totalProtein: number; totalCarbs: number; totalFats: number; waterMl: number };
+  const [monthData, setMonthData] = useState<Record<string, DaySummary>>({});
   const [loading, setLoading] = useState(false);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -48,33 +42,12 @@ export function DietCalendar({ user }: Props) {
 
   const isNextDisabled = viewYear > today.getFullYear() || (viewYear === today.getFullYear() && viewMonth >= today.getMonth());
 
-  // Równoległe ładowanie danych o posiłkach oraz wodzie dla całego miesiąca
   useEffect(() => {
-    const loadMonth = async () => {
-      setLoading(true);
-      const data: Record<string, DayData> = {};
-      const maxDay = viewYear === today.getFullYear() && viewMonth === today.getMonth()
-        ? today.getDate() : daysInMonth;
-
-      for (let d = 1; d <= maxDay; d++) {
-        const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        try {
-          // Pobieramy dane z obu pionów biznesowych równolegle
-          const [diary, water] = await Promise.all([
-          api.loadDiary(dateStr),
-          api.getWaterStatus(dateStr)
-          ]);
-
-          // Zapisujemy dzień w historii jeśli użytkownik cokolwiek zjadł lub wypił
-          if ((diary && diary.totalCalories > 0) || (water && water.currentAmountMl > 0)) {
-            data[dateStr] = { diary, water };
-          }
-        } catch { /* skip */ }
-      }
-      setMonthData(data);
-      setLoading(false);
-    };
-    loadMonth();
+    setMonthData({});
+    setLoading(true);
+    api.getMonthlyCalendar(viewYear, viewMonth + 1)
+      .then(data => setMonthData(data))
+      .finally(() => setLoading(false));
   }, [viewMonth, viewYear, user.userId]);
 
   // Ładowanie szczegółów wybranego dnia (Jedzenie + Woda)
@@ -99,21 +72,19 @@ api.getWaterStatus(selectedDate).then((w: any) => setSelectedWater(w));  }, [sel
     const entry = monthData[dateStr];
     return {
       day: String(day),
-      kcal: entry?.diary?.totalCalories || 0,
-      białko: entry?.diary?.totalProtein || 0,
-      węgle: entry?.diary?.totalCarbs || 0,
-      tłuszcz: entry?.diary?.totalFats || 0,
-      woda: entry?.water?.currentAmountMl || 0, // Nowa kolumna dla wykresu wody
+      kcal: entry?.totalCalories || 0,
+      białko: entry?.totalProtein || 0,
+      węgle: entry?.totalCarbs || 0,
+      tłuszcz: entry?.totalFats || 0,
+      woda: entry?.waterMl || 0,
     };
   });
 
-  // Obliczenia statystyk globalnych
-  const totalMonthKcal = Object.values(monthData).reduce((s, d) => s + (d.diary?.totalCalories || 0), 0);
+  const totalMonthKcal = Object.values(monthData).reduce((s, d) => s + (d.totalCalories || 0), 0);
   const daysWithData = Object.keys(monthData).length;
   const avgKcal = daysWithData > 0 ? Math.round(totalMonthKcal / daysWithData) : 0;
 
-  // Nowe obliczenia dla średniej wody
-  const totalMonthWater = Object.values(monthData).reduce((s, d) => s + (d.water?.currentAmountMl || 0), 0);
+  const totalMonthWater = Object.values(monthData).reduce((s, d) => s + (d.waterMl || 0), 0);
   const avgWater = daysWithData > 0 ? Math.round(totalMonthWater / daysWithData) : 0;
 
   const getCalorieColor = (kcal: number) => {
@@ -195,8 +166,8 @@ api.getWaterStatus(selectedDate).then((w: any) => setSelectedWater(w));  }, [sel
               const isSelected = dateStr === selectedDate;
               const isToday = dateStr === todayStr;
               const entry = monthData[dateStr];
-              const kcal = entry?.diary?.totalCalories || 0;
-              const waterMl = entry?.water?.currentAmountMl || 0; // Odczytujemy wodę dla tego dnia kalendarzowego
+              const kcal = entry?.totalCalories || 0;
+              const waterMl = entry?.waterMl || 0;
               const colorClass = getCalorieColor(kcal);
 
               return (

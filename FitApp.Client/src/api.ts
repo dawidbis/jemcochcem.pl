@@ -53,6 +53,10 @@ export const api = {
     const res = await authFetch(`/api/diary/${date}`);
     return res.ok ? res.json() : null;
   },
+  async getMonthlyCalendar(year: number, month: number): Promise<Record<string, { totalCalories: number; totalProtein: number; totalCarbs: number; totalFats: number; waterMl: number }>> {
+    const res = await authFetch(`/api/diary/monthly-calendar?year=${year}&month=${month}`);
+    return res.ok ? res.json() : {};
+  },
   async searchFoods(query: string): Promise<Food[]> {
     const res = await authFetch(`/api/foods/search?query=${query}`);
     return res.ok ? res.json() : [];

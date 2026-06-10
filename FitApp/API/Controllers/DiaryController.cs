@@ -10,6 +10,13 @@ namespace FitApp.API.Controllers
         private readonly IMediator _mediator;
         public DiaryController(IMediator mediator) => _mediator = mediator;
 
+        [HttpGet("monthly-calendar")]
+        public async Task<IActionResult> GetMonthlyCalendar([FromQuery] int year, [FromQuery] int month)
+        {
+            var result = await _mediator.Send(new GetMonthlyCalendarQuery(CurrentUserId, year, month));
+            return Ok(result);
+        }
+
         [HttpGet("{date}")]
         public async Task<IActionResult> GetDailyDiary([FromRoute] DateTime date)
         {
