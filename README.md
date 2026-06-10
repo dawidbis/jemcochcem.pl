@@ -153,6 +153,23 @@ Wszystkie chronione endpointy dziedziczą z `ApiControllerBase` z atrybutem `[Au
 
 ---
 
+## Konto demo
+
+Przy pierwszym starcie na pustej bazie aplikacja automatycznie tworzy konto demo z 2 miesiącami przykładowych danych.
+
+| | |
+|---|---|
+| **Email** | `demo@fitapp.pl` |
+| **Hasło** | `Demo123!` |
+
+**Co zawiera konto demo (kwiecień – czerwiec 2026):**
+- 7 pomiarów ciała co ~10 dni (waga 85 → 81.8 kg, tkanka tłuszczowa 19 → 17.2%, obwód talii 87 → 84 cm)
+- 47 dzienników posiłków z produktami i makro/mikroskładnikami
+- 61 logów nawodnienia (1600–2800 ml/dzień)
+- 25 sesji treningowych Push/Pull/Legs 3×/tydzień z realną progresją ciężarów (bench 75→95 kg, martwy 110→145 kg, przysiad 90→112.5 kg)
+
+---
+
 ## Uruchomienie
 
 ### Docker Compose (zalecane)
