@@ -6,11 +6,12 @@ import { DietCalendar } from './Components/Dietcalendar';
 import { BodyMeasurements } from './Components/BodyMeasurements';
 import { UserProfile } from './Components/UserProfile';
 import { AiMealMatcher } from './Components/AiMealMatcher';
+import { WorkoutHub } from './Components/WorkoutHub';
 import './App.css';
 import { AppLayout } from './Components/AppLayout';
-import { WorkoutLogger } from './Components/WorkoutLogger';
-import { WorkoutHistory } from './Components/WorkoutHistory';
-type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher' | 'workout-log' | 'workout-history';
+
+type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher' | 'workout';
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [page, setPage] = useState<Page>('diary');
@@ -24,13 +25,12 @@ export default function App() {
 
   return (
     <AppLayout onLogout={handleLogout} activePage={page} onNavigate={setPage}>
-      {page === 'diary' && <FoodDiary user={user} />}
-      {page === 'calendar' && <DietCalendar user={user} />}
-      {page === 'measurements' && <BodyMeasurements user={user} />}
-      {page === 'profile' && <UserProfile userId={user.userId} />}
-      {page === 'ai-matcher' && <AiMealMatcher />}
-     {page === 'workout-log' && <WorkoutLogger userId={user.userId} />}
-{page === 'workout-history' && <WorkoutHistory userId={user.userId} />} </AppLayout>
+      {page === 'diary'       && <FoodDiary user={user} />}
+      {page === 'calendar'    && <DietCalendar user={user} />}
+      {page === 'measurements'&& <BodyMeasurements user={user} />}
+      {page === 'profile'     && <UserProfile userId={user.userId} />}
+      {page === 'ai-matcher'  && <AiMealMatcher />}
+      {page === 'workout'     && <WorkoutHub user={user} />}
+    </AppLayout>
   );
-  
 }

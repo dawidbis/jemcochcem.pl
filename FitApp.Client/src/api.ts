@@ -1,4 +1,4 @@
-import type { DiarySummary, Food, ExternalFood, Measurement, MeasurementStats, CreateMeasurementPayload, AiMealPlan, WaterStatusDto, Exercise, WorkoutSession, LogWorkoutPayload } from './types';
+import type { DiarySummary, Food, ExternalFood, Measurement, MeasurementStats, CreateMeasurementPayload, AiMealPlan, WaterStatusDto, Exercise, WorkoutSession, LogWorkoutPayload, ExerciseProgression } from './types';
 
 let accessToken: string | null = localStorage.getItem('accessToken');
 
@@ -163,8 +163,24 @@ export const api = {
 
   // --- Treningi ---
   async getExercises(): Promise<Exercise[]> {
-    const res = await authFetch(`/api/Workouts/exercises`);
+    const res = await authFetch('/api/Workouts/exercises');
     return res.ok ? res.json() : [];
+  },
+  async addCustomExercise(payload: { name: string; muscleGroup: string }): Promise<{ id: string } | null> {
+    const res = await authFetch('/api/Workouts/exercises', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return res.ok ? res.json() : null;
+  },
+  async deleteCustomExercise(id: string): Promise<boolean> {
+    const res = await authFetch(`/api/Workouts/exercises/${id}`, { method: 'DELETE' });
+    return res.ok;
+  },
+  async getExerciseProgression(exerciseId: string): Promise<ExerciseProgression | null> {
+    const res = await authFetch(`/api/Workouts/exercises/${exerciseId}/progression`);
+    return res.ok ? res.json() : null;
   },
   async logWorkout(payload: LogWorkoutPayload) {
     return authFetch('/api/Workouts/sessions', {
@@ -173,8 +189,16 @@ export const api = {
       body: JSON.stringify(payload),
     });
   },
+  async deleteWorkoutSession(id: string): Promise<boolean> {
+    const res = await authFetch(`/api/Workouts/sessions/${id}`, { method: 'DELETE' });
+    return res.ok;
+  },
   async getWorkoutHistory(): Promise<WorkoutSession[]> {
-    const res = await authFetch(`/api/Workouts/sessions`);
+    const res = await authFetch('/api/Workouts/sessions');
+    return res.ok ? res.json() : [];
+  },
+  async getWorkoutHistoryRange(from: string, to: string): Promise<WorkoutSession[]> {
+    const res = await authFetch(`/api/Workouts/sessions?from=${from}&to=${to}`);
     return res.ok ? res.json() : [];
   },
 };

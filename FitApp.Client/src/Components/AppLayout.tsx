@@ -1,7 +1,7 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "#components/ui/sidebar";
-import { LogOut, Utensils, Scale, User, Sparkles, Calendar, Dumbbell, History } from "lucide-react";
+import { LogOut, Utensils, Scale, User, Sparkles, Calendar, Dumbbell } from "lucide-react";
 
-type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher' | 'workout-log' | 'workout-history';
+type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher' | 'workout';
 
 interface Props {
   children: React.ReactNode;
@@ -41,16 +41,9 @@ export function AppLayout({ children, onLogout, activePage, onNavigate }: Props)
                 </SidebarMenuItem>
 
                 <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => onNavigate('workout-log')} className={`w-full transition-colors rounded-lg py-6 font-medium ${activePage === 'workout-log' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}>
+                  <SidebarMenuButton onClick={() => onNavigate('workout')} className={`w-full transition-colors rounded-lg py-6 font-medium ${activePage === 'workout' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}>
                     <Dumbbell className="mr-2 h-5 w-5" />
-                    <span className="text-base">Zaloguj trening</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => onNavigate('workout-history')} className={`w-full transition-colors rounded-lg py-6 font-medium ${activePage === 'workout-history' ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}>
-                    <History className="mr-2 h-5 w-5" />
-                    <span className="text-base">Historia treningów</span>
+                    <span className="text-base">Siłownia</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 

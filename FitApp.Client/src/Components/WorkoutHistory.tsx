@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import type { WorkoutSession } from '../types';
+import { Trash2 } from 'lucide-react';
 
 interface WorkoutHistoryProps {
   userId: string;
@@ -10,13 +11,20 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ userId }) => {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
     api.getWorkoutHistory().then((data) => {
       setSessions(data);
       setLoading(false);
     });
-  }, [userId]);
+  };
+
+  useEffect(() => { load(); }, [userId]);
+
+  const handleDelete = async (id: string) => {
+    await api.deleteWorkoutSession(id);
+    load();
+  };
 
   if (loading) {
     return <div className="text-center text-sm text-slate-400 py-10">Ładowanie historii...</div>;
@@ -44,10 +52,19 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ userId }) => {
             <span className="font-semibold text-slate-900">
               {new Date(session.date).toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'long' })}
             </span>
-            <span className="text-xs text-slate-400">
-              {session.totalSets} serii · {session.totalVolume.toLocaleString('pl-PL')} kg
-              {session.durationMinutes ? ` · ${session.durationMinutes} min` : ''}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-400">
+                {session.totalSets} serii · {session.totalVolume.toLocaleString('pl-PL')} kg
+                {session.durationMinutes ? ` · ${session.durationMinutes} min` : ''}
+              </span>
+              <button
+                onClick={() => handleDelete(session.id)}
+                className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Usuń sesję"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
 
           {session.notes && (

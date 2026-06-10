@@ -117,3 +117,24 @@ export interface LogWorkoutPayload {
   durationMinutes?: number | null;
   sets: LoggedSet[];
 }
+
+export interface ProgressionPoint {
+  date: string;
+  maxWeight: number;
+  bestReps: number;
+  estOneRepMax: number;
+  totalVolume: number;
+}
+
+export interface ProgressionSuggestion {
+  suggestedWeight: number;
+  suggestedReps: number;
+  message: string;
+}
+
+export interface ExerciseProgression {
+  exerciseId: string;
+  exerciseName: string;
+  history: ProgressionPoint[];
+  suggestion: ProgressionSuggestion | null;
+}

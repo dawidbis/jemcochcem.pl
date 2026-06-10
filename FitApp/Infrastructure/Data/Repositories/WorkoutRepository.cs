@@ -58,6 +58,36 @@ namespace FitApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<bool> DeleteExerciseAsync(Guid userId, Guid exerciseId)
+        {
+            var exercise = await _context.Exercises
+                .FirstOrDefaultAsync(e => e.Id == exerciseId && e.UserId == userId && e.IsCustom);
+            if (exercise == null) return false;
+            _context.Exercises.Remove(exercise);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<WorkoutSession>> GetSessionsByExerciseAsync(Guid userId, Guid exerciseId)
+        {
+            return await _context.WorkoutSessions
+                .Include(s => s.Sets)
+                    .ThenInclude(se => se.Exercise)
+                .Where(s => s.UserId == userId && s.Sets.Any(se => se.ExerciseId == exerciseId))
+                .OrderBy(s => s.Date)
+                .ToListAsync();
+        }
+
+        public async Task<bool> DeleteSessionAsync(Guid userId, Guid sessionId)
+        {
+            var session = await _context.WorkoutSessions
+                .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId);
+            if (session == null) return false;
+            _context.WorkoutSessions.Remove(session);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

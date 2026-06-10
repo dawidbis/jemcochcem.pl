@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../api';
-import type { Exercise, LoggedSet } from '../types';
+import type { Exercise, LoggedSet, ProgressionSuggestion } from '../types';
 import { Button } from "#components/ui/button";
+import { Zap } from 'lucide-react';
 
 interface WorkoutLoggerProps {
   userId: string;
@@ -17,10 +18,19 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ userId }) => {
   const [loggedSets, setLoggedSets] = useState<LoggedSet[]>([]);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const [suggestion, setSuggestion] = useState<ProgressionSuggestion | null>(null);
 
   useEffect(() => {
     api.getExercises().then(setExercises);
   }, [userId]);
+
+  useEffect(() => {
+    setSuggestion(null);
+    if (!selectedExerciseId) return;
+    api.getExerciseProgression(selectedExerciseId).then(p => {
+      setSuggestion(p?.suggestion ?? null);
+    });
+  }, [selectedExerciseId]);
 
   // mapa nazw ćwiczeń dla podglądu serii
   const exerciseMap = useMemo(() => {
@@ -92,11 +102,18 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ userId }) => {
             <option value="">— wybierz ćwiczenie —</option>
             {exercises.map((ex) => (
               <option key={ex.id} value={ex.id}>
-                {ex.muscleGroup} · {ex.name}
+                {ex.muscleGroup} · {ex.name}{ex.isCustom ? ' ★' : ''}
               </option>
             ))}
           </select>
         </div>
+
+        {suggestion && (
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 text-sm">
+            <Zap className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+            <span className="text-blue-700 font-medium">{suggestion.message}</span>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <div>
