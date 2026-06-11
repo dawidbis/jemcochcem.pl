@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogOut, Utensils, Scale, User, Sparkles, Calendar, Dumbbell, Menu, X } from "lucide-react";
-import { useIsMobile } from "#hooks/use-mobile";
 
 type Page = 'diary' | 'calendar' | 'measurements' | 'profile' | 'ai-matcher' | 'workout';
 
@@ -69,8 +68,15 @@ function SidebarContent({ activePage, onNavigate, onLogout, onClose }: {
 }
 
 export function AppLayout({ children, onLogout, activePage, onNavigate }: Props) {
-  const isMobile = useIsMobile();
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)');
+    const onChange = () => setIsMobile(window.innerWidth < 768);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', width: '100%', backgroundColor: '#f8fafc', fontFamily: 'sans-serif', color: '#0f172a' }}>
