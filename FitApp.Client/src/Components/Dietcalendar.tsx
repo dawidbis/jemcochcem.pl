@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 // Dodaliśmy ikonę Droplet dla reprezentacji wody
 import { CalendarDays, Flame, TrendingUp, Droplet } from 'lucide-react';
-import type { User, DiarySummary } from '../types';
+import type { User, DiarySummary, WaterStatusDto } from '../types';
 import { api } from '../api';
 
 interface Props { user: User; }
