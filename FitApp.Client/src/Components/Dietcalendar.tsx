@@ -205,41 +205,78 @@ api.getWaterStatus(selectedDate).then((w: any) => setSelectedWater(w));  }, [sel
           {/* Selected day detail */}
           {selectedDate && (selectedDiary || selectedWater) && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="bg-slate-900 text-white p-5">
-                <h3 className="text-lg font-bold">
-                  {new Date(selectedDate).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </h3>
-                <div className="flex flex-wrap gap-x-6 gap-y-1 mt-3 text-sm">
-                  <span><strong>{selectedDiary?.totalCalories || 0}</strong> kcal</span>
-                  <span className="text-blue-300">B: {selectedDiary?.totalProtein || 0}g</span>
-                  <span className="text-amber-300">W: {selectedDiary?.totalCarbs || 0}g</span>
-                  <span className="text-rose-300">T: {selectedDiary?.totalFats || 0}g</span>
-                  {/* DODANY ODPOWIEDNIK WODY W SZCZEGÓŁACH DNIA */}
-                  <span className="text-blue-400 font-semibold">💧 Woda: {selectedWater?.currentAmountMl || 0} ml</span>
-                </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-300">
-                  <span>Błonnik: {Math.round((selectedDiary?.totalFiber || 0) * 10) / 10}g</span>
-                  <span>Cukry: {Math.round((selectedDiary?.totalSugars || 0) * 10) / 10}g</span>
-                  <span>Tł. nasyc.: {Math.round((selectedDiary?.totalSaturatedFat || 0) * 10) / 10}g</span>
-                  <span>Sód: {Math.round((selectedDiary?.totalSodium || 0) * 10) / 10}mg</span>
-                  <span>Wapń: {Math.round((selectedDiary?.totalCalcium || 0) * 10) / 10}mg</span>
-                  <span>Żelazo: {Math.round((selectedDiary?.totalIron || 0) * 10) / 10}mg</span>
+
+              {/* Nagłówek z datą */}
+              <div className="px-5 pt-5 pb-4 border-b border-slate-100">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-0.5">Wybrany dzień</p>
+                    <h3 className="text-lg font-bold text-slate-900 capitalize">
+                      {new Date(selectedDate + 'T12:00:00').toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                  >✕</button>
                 </div>
               </div>
-              <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto">
+
+              {/* Kafelki makro */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border-b border-slate-100">
+                <div className="bg-orange-50 rounded-xl p-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-orange-500 mb-1">Kalorie</p>
+                  <p className="text-xl font-bold text-slate-900">{selectedDiary?.totalCalories || 0}</p>
+                  <p className="text-[10px] text-slate-400">kcal</p>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-500 mb-1">Białko</p>
+                  <p className="text-xl font-bold text-slate-900">{Math.round(selectedDiary?.totalProtein || 0)}</p>
+                  <p className="text-[10px] text-slate-400">g</p>
+                </div>
+                <div className="bg-amber-50 rounded-xl p-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500 mb-1">Węgle</p>
+                  <p className="text-xl font-bold text-slate-900">{Math.round(selectedDiary?.totalCarbs || 0)}</p>
+                  <p className="text-[10px] text-slate-400">g</p>
+                </div>
+                <div className="bg-rose-50 rounded-xl p-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-500 mb-1">Tłuszcz</p>
+                  <p className="text-xl font-bold text-slate-900">{Math.round(selectedDiary?.totalFats || 0)}</p>
+                  <p className="text-[10px] text-slate-400">g</p>
+                </div>
+              </div>
+
+              {/* Woda + mikro */}
+              <div className="px-4 py-3 border-b border-slate-100 flex flex-wrap gap-x-5 gap-y-1.5">
+                <span className="flex items-center gap-1 text-xs text-blue-600 font-medium">
+                  💧 <strong>{selectedWater?.currentAmountMl || 0} ml</strong> wody
+                </span>
+                {[
+                  { label: 'Błonnik', val: selectedDiary?.totalFiber, unit: 'g' },
+                  { label: 'Cukry', val: selectedDiary?.totalSugars, unit: 'g' },
+                  { label: 'Tł. nasyc.', val: selectedDiary?.totalSaturatedFat, unit: 'g' },
+                  { label: 'Sód', val: selectedDiary?.totalSodium, unit: 'mg' },
+                  { label: 'Wapń', val: selectedDiary?.totalCalcium, unit: 'mg' },
+                  { label: 'Żelazo', val: selectedDiary?.totalIron, unit: 'mg' },
+                ].map(({ label, val, unit }) => (
+                  <span key={label} className="text-xs text-slate-500">
+                    {label}: <strong className="text-slate-700">{Math.round((val || 0) * 10) / 10}{unit}</strong>
+                  </span>
+                ))}
+              </div>
+
+              {/* Lista posiłków */}
+              <div className="divide-y divide-slate-50 max-h-64 overflow-y-auto">
                 {selectedDiary && selectedDiary.items.length > 0 ? selectedDiary.items.map(item => (
-                  <div key={item.id} className="px-5 py-3 flex justify-between items-center">
+                  <div key={item.id} className="px-4 py-2.5 flex justify-between items-center hover:bg-slate-50 transition-colors">
                     <div>
-                      <strong className="text-slate-800 text-sm">{item.foodName}</strong>
-                      <span className="text-xs text-slate-400 ml-2">{item.grams}g</span>
+                      <p className="text-sm font-semibold text-slate-800">{item.foodName}</p>
+                      <p className="text-xs text-slate-400">{item.grams}g &middot; B:{item.macros?.protein}g W:{item.macros?.carbs}g T:{item.macros?.fats}g</p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-slate-700">{item.calories} kcal</div>
-                      <div className="text-xs text-slate-400">B:{item.macros?.protein} W:{item.macros?.carbs} T:{item.macros?.fats}</div>
-                    </div>
+                    <span className="text-sm font-bold text-slate-700 ml-4 shrink-0">{item.calories} kcal</span>
                   </div>
                 )) : (
-                  <div className="p-8 text-center text-slate-400 text-sm">Brak posiłków tego dnia</div>
+                  <div className="py-8 text-center text-slate-400 text-sm">Brak posiłków tego dnia</div>
                 )}
               </div>
             </div>
